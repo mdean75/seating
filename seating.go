@@ -22,6 +22,11 @@ type Attendee struct {
 	pairedWith []int
 }
 
+type pair struct {
+	seat1 Attendee
+	seat2 Attendee
+}
+
 func main() {
 	//var Attendees []Attendee
 	//var Industries []string
@@ -36,7 +41,7 @@ func main() {
 		text = scanner.Text()
 		d.processInput(text)
 	}
-	//3displayMenu()
+
 }
 
 func (d *data) setIndustries(indust *[]string) {
@@ -101,24 +106,38 @@ func (d *data) buildChart() {
 		var p pair
 
 		p.seat1 = d.shiftArray()
-		p.seat2 = d.selectPartner(p.seat1)
+		p.seat2 = d.selectPartner(p.seat1, c)
 
 		d.Pairs = append(d.Pairs, p)
+		addAttendeePairing(p.seat1.id, p.seat2.id, c)
 	}
 
 	// select last two no matter the match
+	lastPair1 := d.shiftArray()
+	lastPair2 := d.shiftArray()
 	d.Pairs = append(d.Pairs, pair{
-		seat1: d.shiftArray(),
-		seat2: d.Attendees[0],
+		seat1: lastPair1,
+		seat2: lastPair2,
 	})
 
-	// call shiftArray to clear the last
-	d.shiftArray()
+	addAttendeePairing(lastPair1.id, lastPair2.id, c)
 
 	fmt.Println(d.Pairs)
+	fmt.Println("\n\n", c)
 
 	// the slice should be nil at this point, reload original data
 	d.Attendees = c
+}
+
+func addAttendeePairing(seat1 int, seat2 int, list []Attendee) {
+	for i := range list {
+		if list[i].id == seat1 {
+			list[i].pairedWith = append(list[i].pairedWith, seat2)
+		}
+		if list[i].id == seat2 {
+			list[i].pairedWith = append(list[i].pairedWith, seat1)
+		}
+	}
 }
 
 func (d *data) shiftArray() Attendee {
@@ -128,7 +147,7 @@ func (d *data) shiftArray() Attendee {
 	return t
 }
 
-func (d *data) selectPartner(seat1 Attendee) Attendee {
+func (d *data) selectPartner(seat1 Attendee, c []Attendee) Attendee {
 	var seat2 Attendee
 	//i := randomInt(0, len(d.Attendees))
 	//seat2 = d.peek(i)
@@ -137,11 +156,27 @@ func (d *data) selectPartner(seat1 Attendee) Attendee {
 		seat2 = d.peek(i)
 
 		if seat2.industry != seat1.industry {
-			// remove from slice - swap to end and reslice
-			d.Attendees[i] = d.Attendees[len(d.Attendees)-1]
-			d.Attendees = d.Attendees[:len(d.Attendees)-1]
+			if seat1.pairedWith == nil {
+				// remove from slice - swap to end and reslice
+				d.Attendees[i] = d.Attendees[len(d.Attendees)-1]
+				d.Attendees = d.Attendees[:len(d.Attendees)-1]
 
-			return seat2
+				return seat2
+			}
+			for _, v := range c {
+				if v.id == seat2.id {
+					if !arrayContains(seat1.id, seat2.pairedWith) {
+						// these two have not been paired before
+						// remove from slice - swap to end and reslice
+						d.Attendees[i] = d.Attendees[len(d.Attendees)-1]
+						d.Attendees = d.Attendees[:len(d.Attendees)-1]
+
+						return seat2
+					}
+
+				}
+			}
+
 		}
 	}
 	//if seat2.industry != seat1.industry {
@@ -151,6 +186,16 @@ func (d *data) selectPartner(seat1 Attendee) Attendee {
 	//}
 	return seat2
 
+}
+
+func arrayContains(needle int, haystack []int) bool {
+	for _, v := range haystack {
+		if needle == v {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (d *data) peek(i int) Attendee {

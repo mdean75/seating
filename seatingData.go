@@ -7,7 +7,7 @@ package main
 //	pairedWith []int
 //}
 
-type pair struct {
-	seat1 Attendee
-	seat2 Attendee
-}
+//type pair struct {
+//	seat1 Attendee
+//	seat2 Attendee
+//}
