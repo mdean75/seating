@@ -1,13 +1,13 @@
 package main
 
-type attendee struct {
-	name       string
-	id         int
-	industry   string
-	pairedWith []int
-}
+//type Attendee struct {
+//	name       string
+//	id         int
+//	industry   string
+//	pairedWith []int
+//}
 
 type pair struct {
-	seat1 attendee
-	seat2 attendee
+	seat1 Attendee
+	seat2 Attendee
 }

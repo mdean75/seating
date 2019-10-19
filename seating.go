@@ -11,11 +11,18 @@ import (
 
 type data struct {
 	Industries []string
-	Attendees  []attendee
+	Attendees  []Attendee
+}
+
+type Attendee struct {
+	name       string
+	id         int
+	industry   string
+	pairedWith []int
 }
 
 func main() {
-	//var Attendees []attendee
+	//var Attendees []Attendee
 	//var Industries []string
 	var d data
 
@@ -42,19 +49,22 @@ func (d *data) processInput(action string) {
 
 	case "2":
 		d.displayAttendeeList()
+
+	case "3":
+		d.buildChart()
 	}
 }
 
 func (d *data) addAttendee() {
-	var att attendee
+	var att Attendee
 
 	fmt.Println("Add Attendee")
 	fmt.Println("\nName: \t\t")
 	att.name = readInput()
 	d.displayIndustries()
 	att.industry = d.getIndustry()
-	fmt.Println("\n")
-	att.id = randomInt(1, 100)
+
+	att.id = randomInt(1, 1000)
 	d.Attendees = append(d.Attendees, att)
 }
 
@@ -75,6 +85,56 @@ func (d *data) displayAttendeeList() {
 	for _, a := range d.Attendees {
 		fmt.Println(a)
 	}
+}
+
+func (d *data) buildChart() {
+	// ensure an even pairing
+	if len(d.Attendees)%2 != 0 {
+		d.Attendees = append(d.Attendees, Attendee{})
+	}
+
+	seat1 := d.shiftArray()
+
+	fmt.Println(seat1)
+
+	seat2 := d.selectPartner(seat1)
+	fmt.Println(seat2)
+}
+
+func (d *data) shiftArray() Attendee {
+	t := d.Attendees[0]
+	d.Attendees = d.Attendees[1:]
+
+	return t
+}
+
+func (d *data) selectPartner(seat1 Attendee) Attendee {
+	var seat2 Attendee
+	//i := randomInt(0, len(d.Attendees))
+	//seat2 = d.peek(i)
+	for {
+		i := randomInt(0, len(d.Attendees))
+		seat2 = d.peek(i)
+
+		if seat2.industry != seat1.industry {
+			// remove from slice - swap to end and reslice
+			d.Attendees[i] = d.Attendees[len(d.Attendees)-1]
+			d.Attendees = d.Attendees[:len(d.Attendees)-1]
+
+			return seat2
+		}
+	}
+	//if seat2.industry != seat1.industry {
+	//	// remove from slice - swap to end and reslice
+	//	d.Attendees[i] = d.Attendees[len(d.Attendees)-1]
+	//	d.Attendees = d.Attendees[:len(d.Attendees)-1]
+	//}
+	return seat2
+
+}
+
+func (d *data) peek(i int) Attendee {
+	return d.Attendees[i]
 }
 
 func readInput() string {
