@@ -12,6 +12,7 @@ import (
 type data struct {
 	Industries []string
 	Attendees  []Attendee
+	Pairs      []pair
 }
 
 type Attendee struct {
@@ -90,15 +91,34 @@ func (d *data) displayAttendeeList() {
 func (d *data) buildChart() {
 	// ensure an even pairing
 	if len(d.Attendees)%2 != 0 {
-		d.Attendees = append(d.Attendees, Attendee{})
+		d.Attendees = append(d.Attendees, Attendee{name: "Placeholder"})
 	}
 
-	seat1 := d.shiftArray()
+	c := make([]Attendee, len(d.Attendees))
+	copy(c, d.Attendees)
 
-	fmt.Println(seat1)
+	for ok := true; ok; ok = len(d.Attendees) > 2 {
+		var p pair
 
-	seat2 := d.selectPartner(seat1)
-	fmt.Println(seat2)
+		p.seat1 = d.shiftArray()
+		p.seat2 = d.selectPartner(p.seat1)
+
+		d.Pairs = append(d.Pairs, p)
+	}
+
+	// select last two no matter the match
+	d.Pairs = append(d.Pairs, pair{
+		seat1: d.shiftArray(),
+		seat2: d.Attendees[0],
+	})
+
+	// call shiftArray to clear the last
+	d.shiftArray()
+
+	fmt.Println(d.Pairs)
+
+	// the slice should be nil at this point, reload original data
+	d.Attendees = c
 }
 
 func (d *data) shiftArray() Attendee {
