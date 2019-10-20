@@ -3,10 +3,14 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/gorilla/mux"
+	"log"
 	"math/rand"
+	"net/http"
 	"os"
+	"seating/api"
 	"strconv"
-	"strings"
+	"time"
 )
 
 type data struct {
@@ -30,22 +34,236 @@ type pair struct {
 func main() {
 	//var Attendees []Attendee
 	//var Industries []string
-	var d data
+	//var d data
+	//
+	//d.setIndustries(&d.Industries)
+	//scanner := bufio.NewScanner(os.Stdin)
+	//var text string
+	//for strings.ToUpper(text) != "Q" {
+	//	displayMenu()
+	//	scanner.Scan()
+	//	text = scanner.Text()
+	//	d.processInput(text)
+	//}
 
-	d.setIndustries(&d.Industries)
-	scanner := bufio.NewScanner(os.Stdin)
-	var text string
-	for strings.ToUpper(text) != "Q" {
-		displayMenu()
-		scanner.Scan()
-		text = scanner.Text()
-		d.processInput(text)
+	r := mux.NewRouter()
+
+	r.Handle("/", api.SecretsForm()).Methods(http.MethodGet)
+	srv := &http.Server{
+		Addr:         "0.0.0.0:3000",
+		Handler:      r,
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 15 * time.Second,
 	}
+	log.Println("api listening on port " + srv.Addr)
+	log.Fatal(srv.ListenAndServe())
 
 }
 
 func (d *data) setIndustries(indust *[]string) {
-	*indust = append(*indust, "Finance", "Construction", "Food and Beverage", "Entertainment")
+	*indust = append(*indust, "Accountants & Tax Preparation",
+		"Advertising",
+		"Advertising: Direct Mail",
+		"Advertising: Promotional Products",
+		"Aesthestics",
+		"Air Duct Cleaning & Chimney Sweep",
+		"Alterations",
+		"Ambulance",
+		"Apartment Complexes",
+		"Appliances: Sales/Service/Parts",
+		"Art Studio",
+		"Automobile: Body & Dent Repair",
+		"Automobile: Detailing",
+		"Automobile: Sales",
+		"Automobile: Services & Repair",
+		"Bakery",
+		"Banks",
+		"Banquet Facilities",
+		"Barber Shop",
+		"Beverage Distributors",
+		"Bookkeeping Services",
+		"BRC: Business Attorney",
+		"BRC: CPA",
+		"Brewery",
+		"Bridal Shop",
+		"Building Materials",
+		"Business Development",
+		"Business Emergency Planning",
+		"Business Networking Organization",
+		"Business Services",
+		"Car Wash",
+		"Career Coaching",
+		"Catering Services",
+		"Chamber of Commerce",
+		"Cheerleading",
+		"Child Care & Preschools",
+		"Chiropractors",
+		"Chocolate & Gifts",
+		"Church",
+		"Civic Organizations",
+		"Cleaning Services: Commercial",
+		"Cleaning Services: Residential",
+		"Coffee House",
+		"Community",
+		"Computer: IT/Service/Security",
+		"Concrete Work: Residential & Commercial",
+		"Construction Supply",
+		"Construction: Commercial",
+		"Construction: Residential",
+		"Consultants",
+		"Consumer Lending",
+		"Counseling Services",
+		"Credit Card Processing",
+		"Credit Unions",
+		"Dance & Gymnastics",
+		"Debt Counseling & Repair",
+		"Dental Health",
+		"Digital Media",
+		"Document Management",
+		"Document Shredding",
+		"Education: Colleges",
+		"Education: Music",
+		"Education: Public & Private Schools",
+		"Educational Services",
+		"Elected Officials",
+		"Electrical",
+		"Embroidery",
+		"Emergency Response & Recovery Planning",
+		"Employment Agency/Service",
+		"Engineering Services",
+		"Entertainment",
+		"Equipment Rental",
+		"Event Planner",
+		"Executive Collaboration Suites",
+		"Financial Services",
+		"Fire Protection",
+		"Fitness Club & Gym",
+		"Flooring",
+		"Florist",
+		"Food and Beverage Supply",
+		"Food Truck",
+		"Funeral Homes",
+		"Furniture",
+		"Furniture: Outdoor",
+		"General Contracting",
+		"Glass & Window Repair",
+		"Golf Course",
+		"Graphic Design",
+		"Hardware Stores",
+		"Health & Wellness",
+		"Healthcare Services",
+		"Heating & Air Services",
+		"Home Decor & Accessories",
+		"Home Health Agencies",
+		"Home Improvement",
+		"Home Inspections",
+		"Hospitals",
+		"Hotels & Motels",
+		"Human Resource Services",
+		"HWP: Grocery",
+		"In-Home Podiatry",
+		"Individual",
+		"Industrial Supplies",
+		"Insurance Broker: Chamber Benefit Plan",
+		"Insurance Services",
+		"Insurance Services: Commercial",
+		"Internet Marketing",
+		"IT",
+		"IT: Back Up/Recovery/Security",
+		"Jewelry",
+		"Kitchen and Bath",
+		"Landscaping & Lawn Service",
+		"Landscaping & Lawn Service: Commercial",
+		"Leadership Development & Coaching",
+		"Legal Services",
+		"Life Coach",
+		"Locksmith",
+		"Mailing Services",
+		"Manufacturing",
+		"Marketing: Mobile/On-line",
+		"Marketing: Sales Promotions",
+		"Marketing: Videography/Photography",
+		"Martial Arts Academy",
+		"Massage Therapy",
+		"Mattress Store",
+		"Meat Market",
+		"Media",
+		"Medicare",
+		"Memory Care Unit",
+		"Mental Health Services",
+		"Mold Remediation",
+		"Mortgage Services",
+		"Moving & Storage",
+		"Newspaper & Magazines",
+		"Non-Profit Organization",
+		"Nutritional Supplement",
+		"Occupational Therapy",
+		"Office Equipment & Copiers",
+		"Optometrists & Ophthamologists",
+		"Pain Management",
+		"Painting & Supplies",
+		"Party Rentals & Inflatables",
+		"Payroll Services",
+		"Personal Trainer & Nutrition Counseling",
+		"Pest Control",
+		"Pet Care",
+		"Pharmacy",
+		"Photo Restoration",
+		"Photographers",
+		"Physical Therapy",
+		"Physicians",
+		"Picture Framing",
+		"Plumbing Services",
+		"Printers & Publishers",
+		"Professional Services",
+		"Property Management",
+		"Radio Station",
+		"Real Estate: Commercial",
+		"Real Estate: Residential",
+		"Recreation & Sports",
+		"Recycling",
+		"Restaurants",
+		"Restaurants: Bar & Grill",
+		"Restaurants: Fast Food",
+		"Restaurants: Frozen Desserts",
+		"Restoration: Fire & Flood",
+		"Retail Shopping",
+		"Roofing",
+		"RV Sales & Repair",
+		"Salon & Spa",
+		"Screen Printing",
+		"Screen Repair",
+		"Sealing",
+		"Security Services",
+		"Self Storage",
+		"Senior Living: Assisted",
+		"Senior Living: Independent",
+		"Senior Living: Skilled Nursing",
+		"Senior Services",
+		"Service Organization",
+		"Services for the Disabled",
+		"Siding & Exteriors",
+		"Sign Manufacturer",
+		"Smoke Shop",
+		"Tanning Salon",
+		"Technology",
+		"Telecommunications Services",
+		"Text Message Marketing",
+		"Title Companies",
+		"Trampoline Park",
+		"Travel Services",
+		"Truck Services",
+		"Trucking Company",
+		"Urgent Care",
+		"Utilities",
+		"Veterinarian",
+		"Web Site Design",
+		"Website-Video",
+		"Wholesale Clubs",
+		"Wholesale Distributor",
+		"Window Treatments",
+		"Wine Bar",
+		"Winery")
 }
 
 func (d *data) processInput(action string) {
@@ -122,11 +340,19 @@ func (d *data) buildChart() {
 
 	addAttendeePairing(lastPair1.id, lastPair2.id, c)
 
-	fmt.Println(d.Pairs)
-	fmt.Println("\n\n", c)
+	//fmt.Println(d.Pairs)
+	//fmt.Println("\n\n", c)
+	printPairs(d.Pairs)
 
 	// the slice should be nil at this point, reload original data
 	d.Attendees = c
+}
+
+func printPairs(pairs []pair) {
+	for _, v := range pairs {
+		fmt.Println(v.seat1.name + ", " + v.seat2.name)
+	}
+	fmt.Print("\n\n")
 }
 
 func addAttendeePairing(seat1 int, seat2 int, list []Attendee) {
@@ -209,7 +435,7 @@ func readInput() string {
 }
 
 func displayMenu() {
-	fmt.Println("Select a menu option")
+	fmt.Println("\n\nSelect a menu option")
 	fmt.Println("\nEnter Attendee \t\t\t ... 1")
 	fmt.Println("\nDisplay list of Attendees \t ... 2")
 	fmt.Println("\nCreate seating charts \t\t ... 3")
