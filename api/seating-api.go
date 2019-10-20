@@ -1,12 +1,16 @@
 package api
 
 import (
+	"encoding/json"
+	"fmt"
 	"html/template"
 	"log"
+	"math/rand"
 	"net/http"
 	"seating/app"
 )
 
+// data struct for the add attendee template
 type inputData struct {
 	Industries   []string
 	KeyErr       string
@@ -14,20 +18,107 @@ type inputData struct {
 	BusinessName string
 }
 
-// SecretsForm is the handler to display the user input form.
-func SecretsForm() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var tData inputData
-		tData.Industries = setIndustries()
-
-		err := loadForm(app.InputForm, w, tData)
-		if err != nil {
-			//log.Debug("error in SecretsForm() received from LoadForm()", err.Error())
-		}
-	})
+// overall data for the application
+type AppData struct {
+	Industries []string
+	Attendees  []Attendee
+	Pairs      []pair
 }
 
-func setIndustries() (industries []string) {
+type Attendee struct {
+	name       string
+	id         int
+	industry   string
+	business   string
+	pairedWith []int
+}
+
+type pair struct {
+	seat1 Attendee
+	seat2 Attendee
+}
+
+// SecretsForm is the handler to display the user input form.
+func (a *AppData) SecretsForm(w http.ResponseWriter, r *http.Request) {
+
+	var tData inputData
+	tData.Industries = a.Industries
+
+	err := loadForm(app.InputForm, w, tData)
+	if err != nil {
+		//log.Debug("error in SecretsForm() received from LoadForm()", err.Error())
+	}
+
+}
+
+func (a *AppData) ProcessSecretsForm(w http.ResponseWriter, r *http.Request) {
+
+	err := r.ParseForm()
+	if err != nil {
+		// do something
+	}
+
+	name := r.Form.Get("name")
+	business := r.Form.Get("business")
+	industry := r.Form.Get("industry")
+
+	attendee := Attendee{
+		name:     name,
+		business: business,
+		id:       randomInt(1, 1000),
+		industry: industry,
+	}
+
+	a.Attendees = append(a.Attendees, attendee)
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+
+	//fmt.Printf("name: %s, business: %s, industry: %s", name, business, industry)
+	//var tData inputData
+	//tData.Industries = SetIndustries()
+	//
+	//err = loadForm(app.InputForm, w, tData)
+	//if err != nil {
+	//	//log.Debug("error in SecretsForm() received from LoadForm()", err.Error())
+	//}
+
+}
+
+func (a *AppData) DisplayAttendees(w http.ResponseWriter, r *http.Request) {
+
+	b, err := json.Marshal(a.Attendees)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	fmt.Println(string(b))
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-type", "application/json")
+	w.Write(b)
+}
+
+// loadForm is a helper function to handling parsing and displaying the forms.
+func loadForm(file string, w http.ResponseWriter, data interface{}) error {
+
+	// parse the template file
+	t, err := template.New("html").Parse(file)
+	if err != nil {
+		log.Println("template parsing error: ", err)
+		return err
+	}
+
+	// load the form
+	err = t.Execute(w, data)
+	if err != nil {
+		log.Print("template executing error: ", err)
+		return err
+	}
+
+	return nil
+
+}
+
+func SetIndustries() (industries []string) {
 	industries = append(industries, "Accountants & Tax Preparation",
 		"Advertising",
 		"Advertising: Direct Mail",
@@ -235,23 +326,6 @@ func setIndustries() (industries []string) {
 	return
 }
 
-// loadForm is a helper function to handling parsing and displaying the forms.
-func loadForm(file string, w http.ResponseWriter, data interface{}) error {
-
-	// parse the template file
-	t, err := template.New("html").Parse(file)
-	if err != nil {
-		log.Println("template parsing error: ", err)
-		return err
-	}
-
-	// load the form
-	err = t.Execute(w, data)
-	if err != nil {
-		log.Print("template executing error: ", err)
-		return err
-	}
-
-	return nil
-
+func randomInt(min, max int) int {
+	return min + rand.Intn(max-min)
 }

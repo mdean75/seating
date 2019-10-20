@@ -46,9 +46,14 @@ func main() {
 	//	d.processInput(text)
 	//}
 
+	var a api.AppData
+	a.Industries = api.SetIndustries()
 	r := mux.NewRouter()
 
-	r.Handle("/", api.SecretsForm()).Methods(http.MethodGet)
+	r.HandleFunc("/", a.SecretsForm).Methods(http.MethodGet)
+	r.HandleFunc("/", a.ProcessSecretsForm).Methods(http.MethodPost)
+	r.HandleFunc("/attendees", a.DisplayAttendees).Methods(http.MethodGet)
+
 	srv := &http.Server{
 		Addr:         "0.0.0.0:3000",
 		Handler:      r,
