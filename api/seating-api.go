@@ -1,8 +1,6 @@
 package api
 
 import (
-	"encoding/json"
-	"fmt"
 	"html/template"
 	"log"
 	"math/rand"
@@ -86,15 +84,14 @@ func (a *AppData) ProcessSecretsForm(w http.ResponseWriter, r *http.Request) {
 
 func (a *AppData) DisplayAttendees(w http.ResponseWriter, r *http.Request) {
 
-	b, err := json.Marshal(a.Attendees)
-	if err != nil {
-		fmt.Println(err.Error())
+	var s string
+	for _, att := range a.Attendees {
+		s = s + att.name + "\n"
 	}
-	fmt.Println(string(b))
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-type", "application/json")
-	w.Write(b)
+	w.Write([]byte(s))
 }
 
 // loadForm is a helper function to handling parsing and displaying the forms.
