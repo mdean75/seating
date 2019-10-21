@@ -45,6 +45,8 @@ var InputForm = `<!DOCTYPE html>
                     </div>
                 </form>
             </div>
+
+            <a href="/attendees" target="_blank" class="btn btn-primary"> Attendee List</a>
         </div>
     </div>
 </div>

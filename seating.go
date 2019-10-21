@@ -53,6 +53,7 @@ func main() {
 	r.HandleFunc("/", a.SecretsForm).Methods(http.MethodGet)
 	r.HandleFunc("/", a.ProcessSecretsForm).Methods(http.MethodPost)
 	r.HandleFunc("/attendees", a.DisplayAttendees).Methods(http.MethodGet)
+	r.HandleFunc("/seating", a.BuildChart).Methods(http.MethodGet)
 
 	srv := &http.Server{
 		Addr:         "0.0.0.0:3000",

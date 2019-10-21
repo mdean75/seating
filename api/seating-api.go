@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"html/template"
 	"log"
 	"math/rand"
@@ -113,6 +114,134 @@ func loadForm(file string, w http.ResponseWriter, data interface{}) error {
 
 	return nil
 
+}
+
+func (a *AppData) BuildChart(w http.ResponseWriter, r *http.Request) {
+	// add a placeholder member if odd number registered
+	if len(a.Attendees)%2 != 0 {
+		a.Attendees = append(a.Attendees, Attendee{name: "Placeholder"})
+	}
+
+	c := make([]Attendee, len(a.Attendees))
+	num := copy(c, a.Attendees)
+	fmt.Printf("number copied: %d \n", num)
+
+	var s string
+	for i := 0; i < 4; i++ {
+
+		for ok := true; ok; ok = len(a.Attendees) > 2 {
+			var p pair
+
+			p.seat1 = a.shiftArray()
+			p.seat2 = a.selectPartner(p.seat1, c)
+
+			a.Pairs = append(a.Pairs, p)
+			addAttendeePairing(p.seat1.id, p.seat2.id, c)
+		}
+
+		// select last two no matter the match
+		lastPair1 := a.shiftArray()
+		lastPair2 := a.shiftArray()
+		a.Pairs = append(a.Pairs, pair{
+			seat1: lastPair1,
+			seat2: lastPair2,
+		})
+
+		addAttendeePairing(lastPair1.id, lastPair2.id, c)
+
+		//fmt.Println(d.Pairs)
+		//fmt.Println("\n\n", c)
+		s += printPairs(a.Pairs)
+
+		a.Pairs = []pair{}
+		// the slice should be nil at this point, reload original data
+		a.Attendees = make([]Attendee, len(c))
+		num = copy(a.Attendees, c)
+		fmt.Printf("number copied: %d \n", num)
+	}
+
+	a.Pairs = []pair{}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-type", "application/json")
+	w.Write([]byte(s))
+}
+
+func printPairs(Pairs []pair) string {
+	var s string
+	for _, p := range Pairs {
+		s = s + fmt.Sprintf("%s (%s) \t\t %s (%s) \n", p.seat1.name, p.seat1.industry, p.seat2.name, p.seat2.industry)
+
+	}
+	s = s + "\n"
+
+	return s
+}
+
+func addAttendeePairing(seat1 int, seat2 int, list []Attendee) {
+	for i := range list {
+		if list[i].id == seat1 {
+			list[i].pairedWith = append(list[i].pairedWith, seat2)
+		}
+		if list[i].id == seat2 {
+			list[i].pairedWith = append(list[i].pairedWith, seat1)
+		}
+	}
+}
+
+func arrayContains(needle int, haystack []int) bool {
+	for _, v := range haystack {
+		if needle == v {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (a *AppData) peek(i int) Attendee {
+	return a.Attendees[i]
+}
+
+func (a *AppData) selectPartner(seat1 Attendee, c []Attendee) Attendee {
+	var seat2 Attendee
+	//i := randomInt(0, len(d.Attendees))
+	//seat2 = d.peek(i)
+	for {
+		i := randomInt(0, len(a.Attendees))
+		seat2 = a.peek(i)
+
+		if seat2.industry != seat1.industry {
+			if seat1.pairedWith == nil {
+				// remove from slice - swap to end and reslice
+				a.Attendees[i] = a.Attendees[len(a.Attendees)-1]
+				a.Attendees = a.Attendees[:len(a.Attendees)-1]
+
+				return seat2
+			}
+			for _, v := range c {
+				if v.id == seat2.id {
+					if !arrayContains(seat1.id, seat2.pairedWith) {
+						// these two have not been paired before
+						// remove from slice - swap to end and reslice
+						a.Attendees[i] = a.Attendees[len(a.Attendees)-1]
+						a.Attendees = a.Attendees[:len(a.Attendees)-1]
+
+						return seat2
+					}
+
+				}
+			}
+
+		}
+	}
+}
+
+func (a *AppData) shiftArray() Attendee {
+	t := a.Attendees[0]
+	a.Attendees = a.Attendees[1:]
+
+	return t
 }
 
 func SetIndustries() (industries []string) {
