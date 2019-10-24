@@ -1,12 +1,15 @@
 package api
 
 import (
+	"bufio"
 	"fmt"
 	"html/template"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
 	"seating/app"
+	"strings"
 )
 
 // data struct for the add attendee template
@@ -35,6 +38,90 @@ type Attendee struct {
 type pair struct {
 	seat1 Attendee
 	seat2 Attendee
+}
+
+func TestJson(w http.ResponseWriter, r *http.Request) {
+
+	body, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	var output string
+	var inv string
+	// read each line, check if there are extra spaces at end of value by calling function, if spaces are
+	// present add invalid message to the line
+	scanner := bufio.NewScanner(strings.NewReader(string(body)))
+	for scanner.Scan() {
+		text := scanner.Text()
+		b := validateNoSpaces(text)
+		if !b {
+			inv = inv + text + "   *** INVALID *** \n"
+			// split the line, add the message to last element, then join back to a single string
+			line := strings.Split(scanner.Text(), "\"")
+			length := len(line)
+			line[length-2] = line[length-2] + "'   *** INVALID ***"
+
+			j := strings.Join(line, "\"")
+			output = output + j
+		} else {
+			output = output + text
+		}
+	}
+
+	w.Header().Set("Content-type", "Text/plain")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(inv))
+}
+
+func validateNoSpaces(s string) bool {
+	// convert string to []rune
+	sr := []rune(s)
+
+	var extractedRunes []rune // used to hold extracted runes, only chars between ""
+
+	var track bool
+
+	// iterate over the rune slice looking for characters between quotes
+	for _, c := range sr {
+
+		if string(c) == "\"" {
+			if track == false {
+				// start tracking
+				track = true
+
+			} else {
+				track = false
+				// add last \" here because the flag has been switched to not track
+				extractedRunes = append(extractedRunes, c)
+			}
+		}
+
+		if track == true {
+			extractedRunes = append(extractedRunes, c)
+		}
+	}
+
+	// convert back to string, the results may contain more than 1 quoted string
+	result := string(extractedRunes)
+
+	// split to get each string we want to evaluate and check if there are any blank spaces
+	z := strings.Split(result, "\"")
+	for _, substr := range z {
+		if len(substr) > 0 {
+			if strings.HasPrefix(substr, " ") || strings.HasSuffix(substr, " ") {
+
+				return false
+			}
+		}
+
+	}
+	return true
+}
+
+func (a *AppData) ResetData(w http.ResponseWriter, r *http.Request) {
+	a.Attendees = []Attendee{}
 }
 
 // SecretsForm is the handler to display the user input form.
