@@ -3,6 +3,7 @@ package api
 import (
 	"bufio"
 	"fmt"
+	"github.com/rivo/sessions"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -15,8 +16,9 @@ import (
 // data struct for the add attendee template
 type inputData struct {
 	Industries   []string
-	KeyErr       string
+	SuccessMsg   string
 	Name         string
+	KeyErr       string
 	BusinessName string
 }
 
@@ -121,27 +123,53 @@ func validateNoSpaces(s string) bool {
 }
 
 func (a *AppData) ResetData(w http.ResponseWriter, r *http.Request) {
+
+	// start new session and create cookie
+	session, _ := sessions.Start(w, r, true)
+	session.Set("successMsg", "Meeting attendees have been reset")
+
 	a.Attendees = []Attendee{}
 
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
-// SecretsForm is the handler to display the user input form.
-func (a *AppData) SecretsForm(w http.ResponseWriter, r *http.Request) {
+// AttendeeEntry is the handler to display the user input form.
+func (a *AppData) AttendeeEntry(w http.ResponseWriter, r *http.Request) {
+
+	// start the session but do not create a new session if one does not exist as this could indicate either someone mistakenly routed to this endpoint or some kind of attack.
+	session, err := sessions.Start(w, r, false)
 
 	var tData inputData
+	// check if there is a session, then get the session message and immediately delete it, if not present set default message
+	if session != nil {
+		msg := session.GetAndDelete("successMsg", "")
+		err = session.Destroy(w, r)
+		//if err != nil {
+		//	// there was an error deleting the session, redirect to main page
+		//	http.Redirect(w, r, "/", http.StatusSeeOther)
+		//
+		//	log.Error(err.Error())
+		//	return
+		//}
+		tData.SuccessMsg = fmt.Sprintf("%v", msg)
+
+	}
+
 	tData.Industries = a.Industries
 
-	err := loadForm(app.InputForm, w, tData)
+	err = loadForm(app.InputForm, w, tData)
 	if err != nil {
-		//log.Debug("error in SecretsForm() received from LoadForm()", err.Error())
+		//log.Debug("error in AttendeeEntry() received from LoadForm()", err.Error())
 	}
 
 }
 
 func (a *AppData) ProcessSecretsForm(w http.ResponseWriter, r *http.Request) {
 
-	err := r.ParseForm()
+	// start new session and create cookie
+	session, err := sessions.Start(w, r, true)
+
+	err = r.ParseForm()
 	if err != nil {
 		// do something
 	}
@@ -159,6 +187,8 @@ func (a *AppData) ProcessSecretsForm(w http.ResponseWriter, r *http.Request) {
 
 	a.Attendees = append(a.Attendees, attendee)
 
+	err = session.Set("successMsg", fmt.Sprintf("Added %s to meeting", attendee.name))
+
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 
 	//fmt.Printf("name: %s, business: %s, industry: %s", name, business, industry)
@@ -167,7 +197,7 @@ func (a *AppData) ProcessSecretsForm(w http.ResponseWriter, r *http.Request) {
 	//
 	//err = loadForm(app.InputForm, w, tData)
 	//if err != nil {
-	//	//log.Debug("error in SecretsForm() received from LoadForm()", err.Error())
+	//	//log.Debug("error in AttendeeEntry() received from LoadForm()", err.Error())
 	//}
 
 }
