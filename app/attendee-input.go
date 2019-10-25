@@ -17,7 +17,7 @@ var InputForm = `<!DOCTYPE html>
             <div class="card-body">
                 <div class="mb-5">
                     <a href="/attendees" target="_blank" class="btn btn-primary col-md-4 offset-md-1">Attendee List</a>
-                    <a href="/reset-attendees" target="_blank" class="btn btn-primary col-md-4 offset-md-2">Reset</a>
+                    <a href="/reset-attendees" class="btn btn-primary col-md-4 offset-md-2">Reset</a>
                 </div>
                 <form method="POST" action="/">
                     <div class="form-group">

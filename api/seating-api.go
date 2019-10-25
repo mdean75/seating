@@ -122,6 +122,8 @@ func validateNoSpaces(s string) bool {
 
 func (a *AppData) ResetData(w http.ResponseWriter, r *http.Request) {
 	a.Attendees = []Attendee{}
+
+	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 // SecretsForm is the handler to display the user input form.
