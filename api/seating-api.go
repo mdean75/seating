@@ -161,10 +161,17 @@ func (a *AppData) BuildChart(w http.ResponseWriter, r *http.Request) {
 	}
 
 	a.Pairs = []pair{}
+	//clearSeating(a.Attendees)
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-type", "application/json")
 	w.Write([]byte(s))
+}
+
+func clearSeating(attendee []Attendee) {
+	for _, a := range attendee {
+		a.pairedWith = []int{}
+	}
 }
 
 func printPairs(Pairs []pair) string {
