@@ -268,8 +268,6 @@ func (a *AppData) BuildChart(w http.ResponseWriter, r *http.Request) {
 
 		addAttendeePairing(lastPair1.id, lastPair2.id, c)
 
-		//fmt.Println(d.Pairs)
-		//fmt.Println("\n\n", c)
 		s += printPairs(a.Pairs)
 
 		a.Pairs = []pair{}
@@ -280,16 +278,18 @@ func (a *AppData) BuildChart(w http.ResponseWriter, r *http.Request) {
 	}
 
 	a.Pairs = []pair{}
-	//clearSeating(a.Attendees)
+
+	a.clearSeating()
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-type", "application/json")
 	w.Write([]byte(s))
 }
 
-func clearSeating(attendee []Attendee) {
-	for _, a := range attendee {
-		a.pairedWith = []int{}
+func (a *AppData) clearSeating() {
+	for i := 0; i < len(a.Attendees); i++ {
+		a.Attendees[i].pairedWith = nil
+		fmt.Println(a.Attendees[i])
 	}
 }
 
