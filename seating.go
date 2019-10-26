@@ -122,7 +122,7 @@ func main() {
 	r.HandleFunc("/json", api.TestJson).Methods(http.MethodPost)
 
 	srv := &http.Server{
-		Addr:         "0.0.0.0:3000",
+		Addr:         "0.0.0.0:80",
 		Handler:      r,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
