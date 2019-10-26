@@ -43,8 +43,6 @@ func main() {
 	r.HandleFunc("/seating", a.BuildChart).Methods(http.MethodGet)
 	r.HandleFunc("/reset-attendees", a.ResetData).Methods(http.MethodGet)
 
-	r.HandleFunc("/json", api.TestJson).Methods(http.MethodPost)
-
 	srv := &http.Server{
 		Addr:         "0.0.0.0:80",
 		Handler:      r,
