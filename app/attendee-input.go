@@ -25,7 +25,7 @@ var InputForm = `<!DOCTYPE html>
                     <a href="/reset-attendees" class="btn btn-danger col-md-3 offset-md-1 mb-3">Reset</a>
                 </div>
 
-                <div class="alert alert-success alert-dismissible fade show {{if .SuccessMsg}} visible {{else}} invisible {{end}}" role="alert">
+                <div class="alert alert-success alert-dismissible fade show {{if .SuccessMsg}} d-block {{else}} d-none {{end}}" role="alert">
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
