@@ -33,19 +33,19 @@
                 <form method="POST" action="/">
                     <div class="form-group">
                         <label for="name">Name</label>
-                        <input type="text" class="form-control form-control-lg {{if .KeyErr}} is-invalid{{else}}{{end}}" name="name" id="name" placeholder="Enter Name (First and Last)" value="{{.Name}}">
+                        <input type="text" class="form-control form-control-lg {{if .KeyErr}} is-invalid{{else}}{{end}}" name="name" id="name" placeholder="Enter Name (First and Last)" value="{{.Name}}" required="required">
                     </div>
                     <div class="form-group">
                         <label for="business">Business Name</label>
-                        <input type="text" class="form-control form-control-lg {{if .KeyErr}} is-invalid{{else}}{{end}}" name="business" id="business" placeholder="Enter Name of Business" value="{{.BusinessName}}">
+                        <input type="text" class="form-control form-control-lg {{if .KeyErr}} is-invalid{{else}}{{end}}" name="business" id="business" placeholder="Enter Name of Business" value="{{.BusinessName}}" required="required">
                     </div>
 {{/*                    <div class="form-group {{if .MsgErr}} visible {{else}} invisible {{end}}">*/}}
 {{/*                        <label class="text-danger">{{.Err}}</label>*/}}
 {{/*                    </div>*/}}
                     <div class="form-group">
                         <label for="industry">Industry</label>
-                        <select class="form-control form-control-lg" name="industry" id="industry">
-                            <option>Select</option>
+                        <select class="form-control form-control-lg" name="industry" id="industry" required="required">
+                            <option value="">Select</option>
                             {{ range $value := .Industries }}
                             <option value="{{ $value }}">{{ $value }}</option>
                             {{ end }}
