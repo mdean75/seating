@@ -236,6 +236,19 @@ func loadForm(file string, w http.ResponseWriter, data interface{}) error {
 }
 
 func (a *AppData) BuildChart(w http.ResponseWriter, r *http.Request) {
+
+	// ensure enough attendees have been entered
+	if len(a.Attendees) < 5 {
+		// start new session and create cookie
+		session, err := sessions.Start(w, r, true)
+		if err != nil {
+
+		}
+		err = session.Set("successMsg", "Unable to build seating charts, not enough attendees!")
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
 	// add a placeholder member if odd number registered
 	if len(a.Attendees)%2 != 0 {
 		a.Attendees = append(a.Attendees, Attendee{name: "Placeholder"})
