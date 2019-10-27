@@ -206,7 +206,7 @@ func (a *AppData) DisplayAttendees(w http.ResponseWriter, r *http.Request) {
 
 	var s string
 	for _, att := range a.Attendees {
-		s = s + att.name + "\n"
+		s = s + att.name + "\t" + att.business + "\n"
 	}
 
 	w.WriteHeader(http.StatusOK)
