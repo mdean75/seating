@@ -309,7 +309,18 @@ func (a *AppData) clearSeating() {
 func printPairs(Pairs []pair) string {
 	var s string
 	for _, p := range Pairs {
-		s = s + fmt.Sprintf("%s (%s) \t\t %s (%s) \n", p.seat1.name, p.seat1.industry, p.seat2.name, p.seat2.industry)
+
+		p1 := fmt.Sprintf("%s (%s)", p.seat1.name, p.seat1.industry)
+		if len(p1) < 60 {
+			numSpaces := 60 - len(p1)
+			i := 0
+			for i < numSpaces {
+				p1 = p1 + " "
+				i++
+			}
+		}
+		p2 := fmt.Sprintf("%s (%s)", p.seat2.name, p.seat2.industry)
+		s = s + p1 + p2 + "\n"
 
 	}
 	s = s + "\n"
