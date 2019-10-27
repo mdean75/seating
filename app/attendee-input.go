@@ -62,6 +62,20 @@ var InputForm = `<!DOCTYPE html>
                     </div>
                 </form>
 
+                <div class="row form-group mt-5">
+                    <input type="button" class="form-control form-control-lg col-2 btn btn-secondary" name="show" id="show" value="Add Industry" onclick="showDiv();">
+                </div>
+
+                <div class="form-group" name="test" id="test" style="display: none">
+
+                    <input type="text" class="form-control form-control-lg" name="newIndustry" id="newIndustry" placeholder="Enter New Industry" >
+
+                    <div class="row form-group mt-5">
+                        <input type="button" class="form-control form-control-lg col-2 btn btn-secondary" name="addIndustry" id="addIndustry" value="Add To List" onclick="addIndustry();">
+                    </div>
+                </div>
+
+
             </div>
 
 
@@ -78,4 +92,27 @@ var InputForm = `<!DOCTYPE html>
             $(".alert").alert('close');
         }, 3000);
     });
+
+    function showDiv() {
+        document.getElementById('test').style.display = "block";
+    }
+
+    function addIndustry() {
+
+        let i = document.getElementById('newIndustry');
+        let list = document.getElementById('industry');
+
+        console.log("i: ", i.value);
+        let add = document.createElement("option");
+        add.value = i.value;
+        add.text = i.value;
+
+        console.log("add: ", add);
+
+        list.add(add);
+
+        i.value = "";
+
+        document.getElementById('test').style.display = "none";
+    }
 </script>`
