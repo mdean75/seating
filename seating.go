@@ -38,7 +38,7 @@ func main() {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/", a.AttendeeEntry).Methods(http.MethodGet)
-	r.HandleFunc("/", a.ProcessSecretsForm).Methods(http.MethodPost)
+	r.HandleFunc("/", a.ProcessAttendeeEntry).Methods(http.MethodPost)
 	r.HandleFunc("/attendees", a.DisplayAttendees).Methods(http.MethodGet)
 	r.HandleFunc("/seating", a.BuildChart).Methods(http.MethodGet)
 	r.HandleFunc("/reset-attendees", a.ResetData).Methods(http.MethodGet)
@@ -46,7 +46,7 @@ func main() {
 	r.HandleFunc("/demo", a.Demo).Methods(http.MethodGet)
 
 	srv := &http.Server{
-		Addr:         "0.0.0.0:80",
+		Addr:         "0.0.0.0:3000",
 		Handler:      r,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
