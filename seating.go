@@ -46,7 +46,7 @@ func main() {
 	r.HandleFunc("/demo", a.Demo).Methods(http.MethodGet)
 
 	srv := &http.Server{
-		Addr:         "0.0.0.0:3000",
+		Addr:         "0.0.0.0:80",
 		Handler:      r,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
