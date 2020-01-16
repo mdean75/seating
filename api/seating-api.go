@@ -106,9 +106,12 @@ func (a *AppData) ProcessAttendeeEntry(w http.ResponseWriter, r *http.Request) {
 		industry: industry,
 	}
 
-	if a.Attendees[len(a.Attendees)-1].name == "Placeholder" {
-		a.Attendees = a.Attendees[:len(a.Attendees)-1]
+	if len(a.Attendees) > 0 {
+		if a.Attendees[len(a.Attendees)-1].name == "Placeholder" {
+			a.Attendees = a.Attendees[:len(a.Attendees)-1]
+		}
 	}
+
 	a.Attendees = append(a.Attendees, attendee)
 
 	err = session.Set("successMsg", fmt.Sprintf("Added %s to meeting", attendee.name))
