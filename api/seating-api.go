@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"fmt"
 	"github.com/rivo/sessions"
 	"html/template"
@@ -8,6 +9,7 @@ import (
 	"math/rand"
 	"net/http"
 	"seating/app"
+	"time"
 )
 
 // data struct for the add attendee template
@@ -163,65 +165,86 @@ func loadForm(file string, w http.ResponseWriter, data interface{}) error {
 
 }
 
+func setSessionError(msg, url string, w http.ResponseWriter, r *http.Request) {
+	session, err := sessions.Start(w, r, true)
+	if err != nil {
+
+	}
+	err = session.Set("successMsg", msg)
+	http.Redirect(w, r, url, http.StatusSeeOther)
+
+}
 func (a *AppData) BuildChart(w http.ResponseWriter, r *http.Request) {
 
-	// ensure enough attendees have been entered
-	if len(a.Attendees) < 5 {
-		// start new session and create cookie
-		session, err := sessions.Start(w, r, true)
-		if err != nil {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 
+	go func(ctx context.Context) {
+		defer cancel()
+		// ensure enough attendees have been entered
+		if len(a.Attendees) < 5 {
+			// start new session and create cookie
+			msg := "Unable to build seating charts, not enough attendees!"
+			setSessionError(msg, "/", w, r)
+
+			return
 		}
-		err = session.Set("successMsg", "Unable to build seating charts, not enough attendees!")
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
+
+		// add a placeholder member if odd number registered
+		if len(a.Attendees)%2 != 0 {
+			a.Attendees = append(a.Attendees, Attendee{name: "Placeholder"})
+		}
+
+		c := make([]Attendee, len(a.Attendees))
+		num := copy(c, a.Attendees)
+		fmt.Printf("number copied: %d \n", num)
+
+		var s string
+
+		for ok := true; ok; ok = len(a.Attendees) > 2 {
+			var p pair
+
+			p.seat1 = a.shiftArray()
+			p.seat2 = a.selectPartner(p.seat1, c)
+
+			a.Pairs = append(a.Pairs, p)
+			addAttendeePairing(p.seat1.id, p.seat2.id, c)
+		}
+
+		// select last two no matter the match
+		lastPair1 := a.shiftArray()
+		lastPair2 := a.shiftArray()
+		a.Pairs = append(a.Pairs, pair{
+			seat1: lastPair1,
+			seat2: lastPair2,
+		})
+
+		addAttendeePairing(lastPair1.id, lastPair2.id, c)
+
+		s += printPairs(a.Pairs)
+
+		a.Pairs = []pair{}
+		// the slice should be nil at this point, reload original data
+		a.Attendees = make([]Attendee, len(c))
+		num = copy(a.Attendees, c)
+		fmt.Printf("number copied: %d \n", num)
+
+		a.ListCount++
+		a.Pairs = []pair{}
+
+		w.WriteHeader(http.StatusOK)
+		w.Header().Set("Content-type", "application/json")
+		w.Write([]byte(s))
+
+	}(ctx)
+
+	select {
+	case <-ctx.Done():
+		if ctx.Err() == context.DeadlineExceeded {
+			fmt.Println(ctx.Err())
+			setSessionError("unable to generate report, cannot find unique pairing", "/", w, r)
+		}
 	}
 
-	// add a placeholder member if odd number registered
-	if len(a.Attendees)%2 != 0 {
-		a.Attendees = append(a.Attendees, Attendee{name: "Placeholder"})
-	}
-
-	c := make([]Attendee, len(a.Attendees))
-	num := copy(c, a.Attendees)
-	fmt.Printf("number copied: %d \n", num)
-
-	var s string
-
-	for ok := true; ok; ok = len(a.Attendees) > 2 {
-		var p pair
-
-		p.seat1 = a.shiftArray()
-		p.seat2 = a.selectPartner(p.seat1, c)
-
-		a.Pairs = append(a.Pairs, p)
-		addAttendeePairing(p.seat1.id, p.seat2.id, c)
-	}
-
-	// select last two no matter the match
-	lastPair1 := a.shiftArray()
-	lastPair2 := a.shiftArray()
-	a.Pairs = append(a.Pairs, pair{
-		seat1: lastPair1,
-		seat2: lastPair2,
-	})
-
-	addAttendeePairing(lastPair1.id, lastPair2.id, c)
-
-	s += printPairs(a.Pairs)
-
-	a.Pairs = []pair{}
-	// the slice should be nil at this point, reload original data
-	a.Attendees = make([]Attendee, len(c))
-	num = copy(a.Attendees, c)
-	fmt.Printf("number copied: %d \n", num)
-
-	a.ListCount++
-	a.Pairs = []pair{}
-
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-type", "application/json")
-	w.Write([]byte(s))
 }
 
 func (a *AppData) clearSeating() {
