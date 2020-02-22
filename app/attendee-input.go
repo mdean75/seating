@@ -16,7 +16,7 @@ var InputForm = `<!DOCTYPE html>
 <body class="bg-primary">
 <div class="container mt-5">
     <div class="row justify-content-center">
-        <h2 class="justify-content-center text-light px-5 py-2" style="font-weight: bold;">Morning Schmooze Pairing</h2>
+        <h2 class="justify-content-center text-light px-5 py-2" style="font-weight: bold;">Morning Schmooze Pairing App</h2>
         <div class="card col-10  bg-light">
             <div class="card-body">
                 <div class="mb-5">
