@@ -44,6 +44,7 @@ func main() {
 	r.HandleFunc("/reset-attendees", a.ResetData).Methods(http.MethodGet)
 
 	r.HandleFunc("/api/attendees", a.DisplayAttendeesAPI).Methods(http.MethodGet)
+	r.HandleFunc("/api/seating", a.BuildChartAPI).Methods(http.MethodGet)
 
 	r.HandleFunc("/demo", a.Demo).Methods(http.MethodGet)
 
