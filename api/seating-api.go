@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/rivo/sessions"
 	"html/template"
@@ -31,11 +32,11 @@ type AppData struct {
 }
 
 type Attendee struct {
-	name       string
-	id         int
-	industry   string
-	business   string
-	pairedWith []int
+	Name       string
+	ID         int
+	Industry   string
+	Business   string
+	PairedWith []int
 }
 
 type pair struct {
@@ -97,37 +98,50 @@ func (a *AppData) ProcessAttendeeEntry(w http.ResponseWriter, r *http.Request) {
 		// do something
 	}
 
-	name := r.Form.Get("name")
-	business := r.Form.Get("business")
-	industry := r.Form.Get("industry")
+	name := r.Form.Get("Name")
+	business := r.Form.Get("Business")
+	industry := r.Form.Get("Industry")
 
 	attendee := Attendee{
-		name:     name,
-		business: business,
-		id:       randomInt(1, 1000),
-		industry: industry,
+		Name:     name,
+		Business: business,
+		ID:       randomInt(1, 1000),
+		Industry: industry,
 	}
 
 	if len(a.Attendees) > 0 {
-		if a.Attendees[len(a.Attendees)-1].name == "Placeholder" {
+		if a.Attendees[len(a.Attendees)-1].Name == "Placeholder" {
 			a.Attendees = a.Attendees[:len(a.Attendees)-1]
 		}
 	}
 
 	a.Attendees = append(a.Attendees, attendee)
 
-	err = session.Set("successMsg", fmt.Sprintf("Added %s to meeting", attendee.name))
+	err = session.Set("successMsg", fmt.Sprintf("Added %s to meeting", attendee.Name))
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 
+}
+
+func (a *AppData) DisplayAttendeesAPI(w http.ResponseWriter, r *http.Request) {
+
+	m := struct {
+		Attendees []Attendee
+	}{Attendees: a.Attendees}
+
+	b, _ := json.Marshal(m)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(b)
 }
 
 func (a *AppData) DisplayAttendees(w http.ResponseWriter, r *http.Request) {
 
 	var s string
 	for _, att := range a.Attendees {
-		//s = s + att.name + att.business + "\n"
-		name := att.name
+		//s = s + att.Name + att.Business + "\n"
+		name := att.Name
 		if len(name) < 20 {
 			numSpaces := 20 - len(name)
 			i := 0
@@ -136,7 +150,7 @@ func (a *AppData) DisplayAttendees(w http.ResponseWriter, r *http.Request) {
 				i++
 			}
 		}
-		s = s + name + att.business + "\n"
+		s = s + name + att.Business + "\n"
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -191,7 +205,7 @@ func (a *AppData) BuildChart(w http.ResponseWriter, r *http.Request) {
 
 		// add a placeholder member if odd number registered
 		if len(a.Attendees)%2 != 0 {
-			a.Attendees = append(a.Attendees, Attendee{name: "Placeholder"})
+			a.Attendees = append(a.Attendees, Attendee{Name: "Placeholder"})
 		}
 
 		c := make([]Attendee, len(a.Attendees))
@@ -207,7 +221,7 @@ func (a *AppData) BuildChart(w http.ResponseWriter, r *http.Request) {
 			p.seat2 = a.selectPartner(p.seat1, c)
 
 			a.Pairs = append(a.Pairs, p)
-			addAttendeePairing(p.seat1.id, p.seat2.id, c)
+			addAttendeePairing(p.seat1.ID, p.seat2.ID, c)
 		}
 
 		// select last two no matter the match
@@ -218,7 +232,7 @@ func (a *AppData) BuildChart(w http.ResponseWriter, r *http.Request) {
 			seat2: lastPair2,
 		})
 
-		addAttendeePairing(lastPair1.id, lastPair2.id, c)
+		addAttendeePairing(lastPair1.ID, lastPair2.ID, c)
 
 		s += printPairs(a.Pairs)
 
@@ -249,7 +263,7 @@ func (a *AppData) BuildChart(w http.ResponseWriter, r *http.Request) {
 
 func (a *AppData) clearSeating() {
 	for i := 0; i < len(a.Attendees); i++ {
-		a.Attendees[i].pairedWith = nil
+		a.Attendees[i].PairedWith = nil
 		fmt.Println(a.Attendees[i])
 	}
 }
@@ -258,7 +272,7 @@ func printPairs(Pairs []pair) string {
 	var s string
 	for _, p := range Pairs {
 
-		p1 := fmt.Sprintf("%s (%s)", p.seat1.name, p.seat1.industry)
+		p1 := fmt.Sprintf("%s (%s)", p.seat1.Name, p.seat1.Industry)
 		if len(p1) < 60 {
 			numSpaces := 60 - len(p1)
 			i := 0
@@ -267,7 +281,7 @@ func printPairs(Pairs []pair) string {
 				i++
 			}
 		}
-		p2 := fmt.Sprintf("%s (%s)", p.seat2.name, p.seat2.industry)
+		p2 := fmt.Sprintf("%s (%s)", p.seat2.Name, p.seat2.Industry)
 		s = s + p1 + p2 + "\n"
 
 	}
@@ -278,11 +292,11 @@ func printPairs(Pairs []pair) string {
 
 func addAttendeePairing(seat1 int, seat2 int, list []Attendee) {
 	for i := range list {
-		if list[i].id == seat1 {
-			list[i].pairedWith = append(list[i].pairedWith, seat2)
+		if list[i].ID == seat1 {
+			list[i].PairedWith = append(list[i].PairedWith, seat2)
 		}
-		if list[i].id == seat2 {
-			list[i].pairedWith = append(list[i].pairedWith, seat1)
+		if list[i].ID == seat2 {
+			list[i].PairedWith = append(list[i].PairedWith, seat1)
 		}
 	}
 }
@@ -309,8 +323,8 @@ func (a *AppData) selectPartner(seat1 Attendee, c []Attendee) Attendee {
 		i := randomInt(0, len(a.Attendees))
 		seat2 = a.peek(i)
 
-		if seat2.industry != seat1.industry {
-			if seat1.pairedWith == nil {
+		if seat2.Industry != seat1.Industry {
+			if seat1.PairedWith == nil {
 				// remove from slice - swap to end and reslice
 				a.Attendees[i] = a.Attendees[len(a.Attendees)-1]
 				a.Attendees = a.Attendees[:len(a.Attendees)-1]
@@ -318,8 +332,8 @@ func (a *AppData) selectPartner(seat1 Attendee, c []Attendee) Attendee {
 				return seat2
 			}
 			for _, v := range c {
-				if v.id == seat2.id {
-					if !arrayContains(seat1.id, seat2.pairedWith) {
+				if v.ID == seat2.ID {
+					if !arrayContains(seat1.ID, seat2.PairedWith) {
 						// these two have not been paired before
 						// remove from slice - swap to end and reslice
 						a.Attendees[i] = a.Attendees[len(a.Attendees)-1]
