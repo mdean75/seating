@@ -27,21 +27,22 @@ type inputData struct {
 type AppData struct {
 	Industries []string
 	Attendees  []Attendee
-	Pairs      []pair
+	Pairs      []Pair
 	ListCount  int
 }
 
 type Attendee struct {
-	Name       string
-	ID         int
-	Industry   string
-	Business   string
-	PairedWith []int
+	Name           string
+	ID             int
+	Industry       string
+	Business       string
+	PairedWith     []int
+	PairedWithName []string
 }
 
-type pair struct {
-	seat1 Attendee
-	seat2 Attendee
+type Pair struct {
+	Seat1 Attendee
+	Seat2 Attendee
 }
 
 func (a *AppData) ResetData(w http.ResponseWriter, r *http.Request) {
@@ -136,6 +137,19 @@ func (a *AppData) DisplayAttendeesAPI(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
+func (a *AppData) DisplayPairsAPI(w http.ResponseWriter, r *http.Request) {
+
+	m := struct {
+		Pairs []Pair
+	}{Pairs: a.Pairs}
+
+	b, _ := json.Marshal(m)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(b)
+}
+
 func (a *AppData) DisplayAttendees(w http.ResponseWriter, r *http.Request) {
 
 	var s string
@@ -215,39 +229,118 @@ func (a *AppData) BuildChart(w http.ResponseWriter, r *http.Request) {
 		var s string
 
 		for ok := true; ok; ok = len(a.Attendees) > 2 {
-			var p pair
+			var p Pair
 
-			p.seat1 = a.shiftArray()
-			p.seat2 = a.selectPartner(p.seat1, c)
+			p.Seat1 = a.shiftArray()
+			p.Seat2 = a.selectPartner(p.Seat1, c)
 
 			a.Pairs = append(a.Pairs, p)
-			addAttendeePairing(p.seat1.ID, p.seat2.ID, c)
+			addAttendeePairing(p.Seat1.ID, p.Seat2.ID, c)
 		}
 
 		// select last two no matter the match
 		lastPair1 := a.shiftArray()
 		lastPair2 := a.shiftArray()
-		a.Pairs = append(a.Pairs, pair{
-			seat1: lastPair1,
-			seat2: lastPair2,
+		a.Pairs = append(a.Pairs, Pair{
+			Seat1: lastPair1,
+			Seat2: lastPair2,
 		})
 
 		addAttendeePairing(lastPair1.ID, lastPair2.ID, c)
 
 		s += printPairs(a.Pairs)
 
-		a.Pairs = []pair{}
+		a.Pairs = []Pair{}
 		// the slice should be nil at this point, reload original data
 		a.Attendees = make([]Attendee, len(c))
 		num = copy(a.Attendees, c)
 		fmt.Printf("number copied: %d \n", num)
 
 		a.ListCount++
-		a.Pairs = []pair{}
+		a.Pairs = []Pair{}
 
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-type", "application/json")
 		w.Write([]byte(s))
+
+	}(ctx)
+
+	select {
+	case <-ctx.Done():
+		if ctx.Err() == context.DeadlineExceeded {
+			fmt.Println(ctx.Err())
+			setSessionError("unable to generate report, cannot find unique pairing", "/", w, r)
+		}
+	}
+
+}
+
+func (a *AppData) BuildChartAPI(w http.ResponseWriter, r *http.Request) {
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+
+	go func(ctx context.Context) {
+		defer cancel()
+		// ensure enough attendees have been entered
+		if len(a.Attendees) < 5 {
+			// start new session and create cookie
+			msg := "Unable to build seating charts, not enough attendees!"
+			setSessionError(msg, "/", w, r)
+
+			return
+		}
+
+		// add a placeholder member if odd number registered
+		if len(a.Attendees)%2 != 0 {
+			a.Attendees = append(a.Attendees, Attendee{Name: "Placeholder"})
+		}
+
+		c := make([]Attendee, len(a.Attendees))
+		num := copy(c, a.Attendees)
+		fmt.Printf("number copied: %d \n", num)
+
+		//var s string
+
+		for ok := true; ok; ok = len(a.Attendees) > 2 {
+			var p Pair
+
+			p.Seat1 = a.shiftArray()
+			p.Seat2 = a.selectPartner(p.Seat1, c)
+
+			a.Pairs = append(a.Pairs, p)
+			addAttendeePairing(p.Seat1.ID, p.Seat2.ID, c)
+		}
+
+		// select last two no matter the match
+		lastPair1 := a.shiftArray()
+		lastPair2 := a.shiftArray()
+		a.Pairs = append(a.Pairs, Pair{
+			Seat1: lastPair1,
+			Seat2: lastPair2,
+		})
+
+		addAttendeePairing(lastPair1.ID, lastPair2.ID, c)
+
+		m := struct {
+			Pairs []Pair
+		}{Pairs: a.Pairs}
+		b, err := json.Marshal(m)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		a.Pairs = []Pair{}
+		// the slice should be nil at this point, reload original data
+		a.Attendees = make([]Attendee, len(c))
+		num = copy(a.Attendees, c)
+		fmt.Printf("number copied: %d \n", num)
+
+		a.ListCount++
+		a.Pairs = []Pair{}
+
+		w.WriteHeader(http.StatusOK)
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(b)
 
 	}(ctx)
 
@@ -268,11 +361,11 @@ func (a *AppData) clearSeating() {
 	}
 }
 
-func printPairs(Pairs []pair) string {
+func printPairs(Pairs []Pair) string {
 	var s string
 	for _, p := range Pairs {
 
-		p1 := fmt.Sprintf("%s (%s)", p.seat1.Name, p.seat1.Industry)
+		p1 := fmt.Sprintf("%s (%s)", p.Seat1.Name, p.Seat1.Industry)
 		if len(p1) < 60 {
 			numSpaces := 60 - len(p1)
 			i := 0
@@ -281,7 +374,7 @@ func printPairs(Pairs []pair) string {
 				i++
 			}
 		}
-		p2 := fmt.Sprintf("%s (%s)", p.seat2.Name, p.seat2.Industry)
+		p2 := fmt.Sprintf("%s (%s)", p.Seat2.Name, p.Seat2.Industry)
 		s = s + p1 + p2 + "\n"
 
 	}
@@ -318,7 +411,7 @@ func (a *AppData) peek(i int) Attendee {
 func (a *AppData) selectPartner(seat1 Attendee, c []Attendee) Attendee {
 	var seat2 Attendee
 	//i := randomInt(0, len(d.Attendees))
-	//seat2 = d.peek(i)
+	//Seat2 = d.peek(i)
 	for {
 		i := randomInt(0, len(a.Attendees))
 		seat2 = a.peek(i)
