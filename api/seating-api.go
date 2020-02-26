@@ -149,6 +149,7 @@ func (a *AppData) AddAttendeeAPI() http.HandlerFunc {
 		b, err := json.Marshal(resp)
 
 		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.WriteHeader(http.StatusOK)
 		w.Write(b)
 	}
@@ -177,6 +178,7 @@ func (a *AppData) DisplayPairsAPI(w http.ResponseWriter, r *http.Request) {
 	b, _ := json.Marshal(m)
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
 	w.Write(b)
 }
@@ -185,6 +187,7 @@ func (a *AppData) GetAppData() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(a)
 	}
@@ -212,6 +215,7 @@ func (a *AppData) GetIndustries() http.HandlerFunc {
 		}{Industries: a.Industries}
 
 		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(m)
 	}
