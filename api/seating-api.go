@@ -150,6 +150,41 @@ func (a *AppData) DisplayPairsAPI(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
+func (a *AppData) GetAppData() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(a)
+	}
+}
+
+func (a *AppData) GetListCount() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		m := struct {
+			ListCount int
+		}{ListCount: a.ListCount}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(m)
+	}
+}
+
+func (a *AppData) GetIndustries() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		m := struct {
+			Industries []string
+		}{Industries: a.Industries}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(m)
+	}
+}
+
 func (a *AppData) DisplayAttendees(w http.ResponseWriter, r *http.Request) {
 
 	var s string
@@ -283,10 +318,11 @@ func (a *AppData) BuildChartAPI(w http.ResponseWriter, r *http.Request) {
 		defer cancel()
 		// ensure enough attendees have been entered
 		if len(a.Attendees) < 5 {
-			// TODO: CHANGE THIS TO RESPOND WITH ERROR INSTEAD OF SESSION MESSAGES
-			// start new session and create cookie
-			msg := "Unable to build seating charts, not enough attendees!"
-			setSessionError(msg, "/", w, r)
+			m := map[string]string{"error": "Unable to build seating charts, not enough attendees!"}
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(m)
 
 			return
 		}
@@ -349,6 +385,7 @@ func (a *AppData) BuildChartAPI(w http.ResponseWriter, r *http.Request) {
 	select {
 	case <-ctx.Done():
 		if ctx.Err() == context.DeadlineExceeded {
+			// TODO: TAKE OUT THE SESSION MESSAGE IN FAVOR OF BETTER LOGGING
 			fmt.Println(ctx.Err())
 			setSessionError("unable to generate report, cannot find unique pairing", "/", w, r)
 		}

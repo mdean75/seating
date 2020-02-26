@@ -45,6 +45,9 @@ func main() {
 
 	r.HandleFunc("/api/attendees", a.DisplayAttendeesAPI).Methods(http.MethodGet)
 	r.HandleFunc("/api/seating", a.BuildChartAPI).Methods(http.MethodGet)
+	r.Handle("/api/appdata", a.GetAppData()).Methods(http.MethodGet)
+	r.Handle("/api/count", a.GetListCount()).Methods(http.MethodGet)
+	r.Handle("/api/industry", a.GetIndustries()).Methods(http.MethodGet)
 
 	r.HandleFunc("/demo", a.Demo).Methods(http.MethodGet)
 
