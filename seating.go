@@ -48,6 +48,7 @@ func main() {
 	r.Handle("/api/appdata", a.GetAppData()).Methods(http.MethodGet)
 	r.Handle("/api/count", a.GetListCount()).Methods(http.MethodGet)
 	r.Handle("/api/industry", a.GetIndustries()).Methods(http.MethodGet)
+	r.Handle("/api/attendee", a.AddAttendeeAPI()).Methods(http.MethodPost)
 
 	r.HandleFunc("/demo", a.Demo).Methods(http.MethodGet)
 
