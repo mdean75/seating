@@ -198,6 +198,7 @@ func (a *AppData) GetListCount() http.HandlerFunc {
 		}{ListCount: a.ListCount}
 
 		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(m)
 	}
