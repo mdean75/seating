@@ -235,7 +235,7 @@ func (a *AppData) BuildChart(w http.ResponseWriter, r *http.Request) {
 			p.Seat2 = a.selectPartner(p.Seat1, c)
 
 			a.Pairs = append(a.Pairs, p)
-			addAttendeePairing(p.Seat1.ID, p.Seat2.ID, c)
+			addAttendeePairing(p.Seat1, p.Seat2, c)
 		}
 
 		// select last two no matter the match
@@ -246,7 +246,7 @@ func (a *AppData) BuildChart(w http.ResponseWriter, r *http.Request) {
 			Seat2: lastPair2,
 		})
 
-		addAttendeePairing(lastPair1.ID, lastPair2.ID, c)
+		addAttendeePairing(lastPair1, lastPair2, c)
 
 		s += printPairs(a.Pairs)
 
@@ -283,6 +283,7 @@ func (a *AppData) BuildChartAPI(w http.ResponseWriter, r *http.Request) {
 		defer cancel()
 		// ensure enough attendees have been entered
 		if len(a.Attendees) < 5 {
+			// TODO: CHANGE THIS TO RESPOND WITH ERROR INSTEAD OF SESSION MESSAGES
 			// start new session and create cookie
 			msg := "Unable to build seating charts, not enough attendees!"
 			setSessionError(msg, "/", w, r)
@@ -308,7 +309,7 @@ func (a *AppData) BuildChartAPI(w http.ResponseWriter, r *http.Request) {
 			p.Seat2 = a.selectPartner(p.Seat1, c)
 
 			a.Pairs = append(a.Pairs, p)
-			addAttendeePairing(p.Seat1.ID, p.Seat2.ID, c)
+			addAttendeePairing(p.Seat1, p.Seat2, c)
 		}
 
 		// select last two no matter the match
@@ -319,11 +320,12 @@ func (a *AppData) BuildChartAPI(w http.ResponseWriter, r *http.Request) {
 			Seat2: lastPair2,
 		})
 
-		addAttendeePairing(lastPair1.ID, lastPair2.ID, c)
+		addAttendeePairing(lastPair1, lastPair2, c)
 
 		m := struct {
 			Pairs []Pair
 		}{Pairs: a.Pairs}
+
 		b, err := json.Marshal(m)
 		if err != nil {
 			fmt.Println(err)
@@ -338,8 +340,8 @@ func (a *AppData) BuildChartAPI(w http.ResponseWriter, r *http.Request) {
 		a.ListCount++
 		a.Pairs = []Pair{}
 
-		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
 		w.Write(b)
 
 	}(ctx)
@@ -354,12 +356,12 @@ func (a *AppData) BuildChartAPI(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (a *AppData) clearSeating() {
-	for i := 0; i < len(a.Attendees); i++ {
-		a.Attendees[i].PairedWith = nil
-		fmt.Println(a.Attendees[i])
-	}
-}
+//func (a *AppData) clearSeating() {
+//	for i := 0; i < len(a.Attendees); i++ {
+//		a.Attendees[i].PairedWith = nil
+//		fmt.Println(a.Attendees[i])
+//	}
+//}
 
 func printPairs(Pairs []Pair) string {
 	var s string
@@ -383,13 +385,15 @@ func printPairs(Pairs []Pair) string {
 	return s
 }
 
-func addAttendeePairing(seat1 int, seat2 int, list []Attendee) {
+func addAttendeePairing(seat1 Attendee, seat2 Attendee, list []Attendee) {
 	for i := range list {
-		if list[i].ID == seat1 {
-			list[i].PairedWith = append(list[i].PairedWith, seat2)
+		if list[i].ID == seat1.ID {
+			list[i].PairedWith = append(list[i].PairedWith, seat2.ID)
+			list[i].PairedWithName = append(list[i].PairedWithName, seat2.Name)
 		}
-		if list[i].ID == seat2 {
-			list[i].PairedWith = append(list[i].PairedWith, seat1)
+		if list[i].ID == seat2.ID {
+			list[i].PairedWith = append(list[i].PairedWith, seat1.ID)
+			list[i].PairedWithName = append(list[i].PairedWithName, seat1.Name)
 		}
 	}
 }
