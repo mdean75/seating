@@ -150,6 +150,7 @@ func (a *AppData) AddAttendeeAPI() http.HandlerFunc {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Cache-Control", "no-store")
 		w.WriteHeader(http.StatusOK)
 		w.Write(b)
 	}
@@ -165,6 +166,8 @@ func (a *AppData) DisplayAttendeesAPI(w http.ResponseWriter, r *http.Request) {
 	b, _ := json.Marshal(m)
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Cache-Control", "no-store")
 	w.WriteHeader(http.StatusOK)
 	w.Write(b)
 }
@@ -179,6 +182,7 @@ func (a *AppData) DisplayPairsAPI(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Cache-Control", "no-store")
 	w.WriteHeader(http.StatusOK)
 	w.Write(b)
 }
