@@ -124,6 +124,37 @@ func (a *AppData) ProcessAttendeeEntry(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (a *AppData) AddAttendeeAPI() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		var att Attendee
+		err := json.NewDecoder(r.Body).Decode(&att)
+		if err != nil {
+			resp := map[string]string{"error": err.Error()}
+
+			//resp := map[string]string{"response": "successfully added attendee"}
+			b, _ := json.Marshal(resp)
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write(b)
+
+			return
+		}
+
+		att.ID = randomInt(1, 1000)
+		a.Attendees = append(a.Attendees, att)
+
+		resp := map[string]string{"response": "successfully added attendee"}
+		b, err := json.Marshal(resp)
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write(b)
+	}
+
+}
+
 func (a *AppData) DisplayAttendeesAPI(w http.ResponseWriter, r *http.Request) {
 
 	m := struct {
