@@ -15,20 +15,20 @@ import (
 
 // data struct for the add attendee template
 type inputData struct {
-	Industries   []string
-	SuccessMsg   string
-	Name         string
-	KeyErr       string
-	BusinessName string
-	ListCount    int
+	Industries   []string `json:"industries"`
+	SuccessMsg   string   `json:"successMsg"`
+	Name         string   `json:"name"`
+	KeyErr       string   `json:"keyErr"`
+	BusinessName string   `json:"businessName"`
+	ListCount    int      `json:"listCount"`
 }
 
 // overall data for the application
 type AppData struct {
-	Industries []string
-	Attendees  []Attendee
-	Pairs      []Pair
-	ListCount  int
+	Industries []string   `json:"industries"`
+	Attendees  []Attendee `json:"attendees"`
+	Pairs      []Pair     `json:"pairs"`
+	ListCount  int        `json:"listCount"`
 }
 
 type Attendee struct {
@@ -41,8 +41,8 @@ type Attendee struct {
 }
 
 type Pair struct {
-	Seat1 Attendee
-	Seat2 Attendee
+	Seat1 Attendee `json:"seat1"`
+	Seat2 Attendee `json:"seat2"`
 }
 
 func (a *AppData) ResetData(w http.ResponseWriter, r *http.Request) {
@@ -419,6 +419,8 @@ func (a *AppData) BuildChartAPI(w http.ResponseWriter, r *http.Request) {
 		a.Pairs = []Pair{}
 
 		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Cache-Control", "no-store")
 		w.WriteHeader(http.StatusOK)
 		w.Write(b)
 
