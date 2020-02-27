@@ -32,12 +32,12 @@ type AppData struct {
 }
 
 type Attendee struct {
-	Name           string
-	ID             int
-	Industry       string
-	Business       string
-	PairedWith     []int
-	PairedWithName []string
+	Name           string   `json:"name" bson:"name"`
+	ID             int      `json:"id" bson:"id"`
+	Industry       string   `json:"industry" bson:"industry"`
+	Business       string   `json:"business" bson:"business"`
+	PairedWith     []int    `json:"pairedWith" bson:"pairedWith"`
+	PairedWithName []string `json:"pairedWithName" bson:"pairedWithName"`
 }
 
 type Pair struct {
@@ -159,11 +159,11 @@ func (a *AppData) AddAttendeeAPI() http.HandlerFunc {
 
 func (a *AppData) DisplayAttendeesAPI(w http.ResponseWriter, r *http.Request) {
 
-	m := struct {
-		Attendees []Attendee
-	}{Attendees: a.Attendees}
+	//m := struct {
+	//	Attendees []Attendee
+	//}{Attendees: a.Attendees}
 
-	b, _ := json.Marshal(m)
+	b, _ := json.Marshal(a.Attendees)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
