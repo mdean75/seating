@@ -99,9 +99,9 @@ func (a *AppData) ProcessAttendeeEntry(w http.ResponseWriter, r *http.Request) {
 		// do something
 	}
 
-	name := r.Form.Get("Name")
-	business := r.Form.Get("Business")
-	industry := r.Form.Get("Industry")
+	name := r.Form.Get("name")
+	business := r.Form.Get("business")
+	industry := r.Form.Get("industry")
 
 	attendee := Attendee{
 		Name:     name,
