@@ -172,6 +172,18 @@ func (a *AppData) DisplayAttendeesAPI(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
+func (a *AppData) ResetAttendeesAPI(w http.ResponseWriter, r *http.Request) {
+
+	a.Attendees = []Attendee{}
+	a.ListCount = 0
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Cache-Control", "no-store")
+	w.WriteHeader(http.StatusOK)
+	w.Write(nil)
+}
+
 func (a *AppData) DisplayPairsAPI(w http.ResponseWriter, r *http.Request) {
 
 	m := struct {

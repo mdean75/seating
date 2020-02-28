@@ -42,6 +42,7 @@ func main() {
 	r.HandleFunc("/attendees", a.DisplayAttendees).Methods(http.MethodGet)
 	r.HandleFunc("/seating", a.BuildChart).Methods(http.MethodGet)
 	r.HandleFunc("/reset-attendees", a.ResetData).Methods(http.MethodGet)
+	r.HandleFunc("/api/reset", a.ResetAttendeesAPI).Methods(http.MethodGet)
 
 	r.HandleFunc("/api/attendees", a.DisplayAttendeesAPI).Methods(http.MethodGet)
 	r.HandleFunc("/api/seating", a.BuildChartAPI).Methods(http.MethodGet)
@@ -51,6 +52,7 @@ func main() {
 	r.Handle("/api/attendee", a.AddAttendeeAPI()).Methods(http.MethodPost)
 
 	r.HandleFunc("/demo", a.Demo).Methods(http.MethodGet)
+	r.HandleFunc("/api/demo", a.DemoAPI).Methods(http.MethodGet)
 
 	srv := &http.Server{
 		Addr:         "0.0.0.0:3000",

@@ -8,6 +8,16 @@ func (a *AppData) Demo(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
+func (a *AppData) DemoAPI(w http.ResponseWriter, r *http.Request) {
+	a.LoadDemoData()
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Cache-Control", "no-store")
+	w.WriteHeader(http.StatusOK)
+	w.Write(nil)
+}
+
 func (a *AppData) LoadDemoData() {
 
 	a.Attendees = []Attendee{
