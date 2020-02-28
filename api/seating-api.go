@@ -201,15 +201,15 @@ func (a *AppData) GetAppData() http.HandlerFunc {
 func (a *AppData) GetListCount() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		m := struct {
-			ListCount int
-		}{ListCount: a.ListCount}
+		//m := struct {
+		//	ListCount int
+		//}{ListCount: a.ListCount}
 
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Cache-Control", "no-store")
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(m)
+		json.NewEncoder(w).Encode(a.ListCount)
 	}
 }
 
