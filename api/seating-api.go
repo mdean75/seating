@@ -127,26 +127,38 @@ func (a *AppData) ProcessAttendeeEntry(w http.ResponseWriter, r *http.Request) {
 func (a *AppData) AddAttendeeAPI() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
+		name := r.URL.Query().Get("name")
+		bus := r.URL.Query().Get("business")
+		ind := r.URL.Query().Get("industry")
+
 		var att Attendee
-		err := json.NewDecoder(r.Body).Decode(&att)
-		if err != nil {
-			resp := map[string]string{"error": err.Error()}
-
-			//resp := map[string]string{"response": "successfully added attendee"}
-			b, _ := json.Marshal(resp)
-
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write(b)
-
-			return
-		}
+		//var i interface{}
+		//err := json.NewDecoder(r.Body).Decode(&i)
+		//if err != nil {
+		//	resp := map[string]string{"error": err.Error()}
+		//
+		//	//resp := map[string]string{"response": "successfully added attendee"}
+		//	b, _ := json.Marshal(resp)
+		//
+		//	w.Header().Set("Content-Type", "application/json")
+		//	w.Header().Set("Access-Control-Allow-Origin", "*")
+		//	w.Header().Set("Access-Control-Allow-Origin", "Origin, Content-Type, X-Auth-Token")
+		//	w.Header().Set("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE, OPTIONS");
+		//	w.Header().Set("Cache-Control", "no-store")
+		//	w.WriteHeader(http.StatusBadRequest)
+		//	w.Write(b)
+		//
+		//	return
+		//}
 
 		att.ID = randomInt(1, 1000)
+		att.Name = name
+		att.Business = bus
+		att.Industry = ind
 		a.Attendees = append(a.Attendees, att)
 
 		resp := map[string]string{"response": "successfully added attendee"}
-		b, err := json.Marshal(resp)
+		b, _ := json.Marshal(resp)
 
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
