@@ -400,11 +400,11 @@ func (a *AppData) BuildChartAPI(w http.ResponseWriter, r *http.Request) {
 
 		addAttendeePairing(lastPair1, lastPair2, c)
 
-		m := struct {
-			Pairs []Pair
-		}{Pairs: a.Pairs}
+		//m := struct {
+		//	Pairs []Pair
+		//}{Pairs: a.Pairs}
 
-		b, err := json.Marshal(m)
+		b, err := json.Marshal(a.Pairs)
 		if err != nil {
 			fmt.Println(err)
 		}
