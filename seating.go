@@ -37,6 +37,8 @@ func main() {
 	a.Industries = api.SetIndustries()
 	r := mux.NewRouter()
 
+	r.Handle("/api/attendee", a.AddAttendeeAPI()).Methods(http.MethodGet, http.MethodOptions)
+
 	r.HandleFunc("/", a.AttendeeEntry).Methods(http.MethodGet)
 	r.HandleFunc("/", a.ProcessAttendeeEntry).Methods(http.MethodPost)
 	r.HandleFunc("/attendees", a.DisplayAttendees).Methods(http.MethodGet)
@@ -49,7 +51,6 @@ func main() {
 	r.Handle("/api/appdata", a.GetAppData()).Methods(http.MethodGet)
 	r.Handle("/api/count", a.GetListCount()).Methods(http.MethodGet)
 	r.Handle("/api/industry", a.GetIndustries()).Methods(http.MethodGet)
-	r.Handle("/api/attendee", a.AddAttendeeAPI()).Methods(http.MethodPost)
 
 	r.HandleFunc("/demo", a.Demo).Methods(http.MethodGet)
 	r.HandleFunc("/api/demo", a.DemoAPI).Methods(http.MethodGet)
