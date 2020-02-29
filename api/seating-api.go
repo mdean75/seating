@@ -106,7 +106,7 @@ func (a *AppData) ProcessAttendeeEntry(w http.ResponseWriter, r *http.Request) {
 	attendee := Attendee{
 		Name:     name,
 		Business: business,
-		ID:       randomInt(1, 1000),
+		ID:       a.generateID(),
 		Industry: industry,
 	}
 
@@ -151,10 +151,10 @@ func (a *AppData) AddAttendeeAPI() http.HandlerFunc {
 		//	return
 		//}
 
-		att.ID = randomInt(1, 1000)
 		att.Name = name
 		att.Business = bus
 		att.Industry = ind
+		att.ID = a.generateID() //randomInt(1, 1000)
 		a.Attendees = append(a.Attendees, att)
 
 		resp := map[string]string{"response": "successfully added attendee"}
@@ -170,10 +170,6 @@ func (a *AppData) AddAttendeeAPI() http.HandlerFunc {
 }
 
 func (a *AppData) DisplayAttendeesAPI(w http.ResponseWriter, r *http.Request) {
-
-	//m := struct {
-	//	Attendees []Attendee
-	//}{Attendees: a.Attendees}
 
 	b, _ := json.Marshal(a.Attendees)
 
@@ -224,10 +220,6 @@ func (a *AppData) GetAppData() http.HandlerFunc {
 
 func (a *AppData) GetListCount() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
-		//m := struct {
-		//	ListCount int
-		//}{ListCount: a.ListCount}
 
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -558,6 +550,27 @@ func (a *AppData) shiftArray() Attendee {
 	return t
 }
 
+func (a *AppData) generateID() int {
+	var i int
+	var b bool
+
+	for !b {
+		i = randomInt(1, 1000)
+		b = a.isUniqueID(i)
+		fmt.Println()
+	}
+	return i
+}
+
+func (a *AppData) isUniqueID(id int) bool {
+	for _, attendee := range a.Attendees {
+		if attendee.ID == id {
+			return false // this id already exists, return false
+		}
+	}
+	return true
+}
+
 func SetIndustries() (industries []string) {
 	industries = append(industries, "Accountants & Tax Preparation",
 		"Advertising",
@@ -767,5 +780,6 @@ func SetIndustries() (industries []string) {
 }
 
 func randomInt(min, max int) int {
+	rand.Seed(time.Now().UnixNano())
 	return min + rand.Intn(max-min)
 }
