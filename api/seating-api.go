@@ -106,7 +106,7 @@ func (a *AppData) ProcessAttendeeEntry(w http.ResponseWriter, r *http.Request) {
 	attendee := Attendee{
 		Name:     name,
 		Business: business,
-		ID:       randomInt(1, 1000),
+		ID:       a.generateID(),
 		Industry: industry,
 	}
 
