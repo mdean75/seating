@@ -324,7 +324,7 @@ func (a *AppData) BuildChart(w http.ResponseWriter, r *http.Request) {
 		for ok := true; ok; ok = len(a.Attendees) > 2 {
 			var p Pair
 
-			p.Seat1 = a.shiftArray()
+			p.Seat1 = a.arrayShift()
 			p.Seat2 = a.selectPartner(p.Seat1, c)
 
 			a.Pairs = append(a.Pairs, p)
@@ -332,8 +332,8 @@ func (a *AppData) BuildChart(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// select last two no matter the match
-		lastPair1 := a.shiftArray()
-		lastPair2 := a.shiftArray()
+		lastPair1 := a.arrayShift()
+		lastPair2 := a.arrayShift()
 		a.Pairs = append(a.Pairs, Pair{
 			Seat1: lastPair1,
 			Seat2: lastPair2,
@@ -351,6 +351,9 @@ func (a *AppData) BuildChart(w http.ResponseWriter, r *http.Request) {
 
 		a.ListCount++
 		a.Pairs = []Pair{}
+
+		// remove the placeholder attendee
+		a.Attendees = arrayPop(a.Attendees)
 
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-type", "application/json")
@@ -399,7 +402,7 @@ func (a *AppData) BuildChartAPI(w http.ResponseWriter, r *http.Request) {
 		for ok := true; ok; ok = len(a.Attendees) > 2 {
 			var p Pair
 
-			p.Seat1 = a.shiftArray()
+			p.Seat1 = a.arrayShift()
 			p.Seat2 = a.selectPartner(p.Seat1, c)
 
 			a.Pairs = append(a.Pairs, p)
@@ -407,8 +410,8 @@ func (a *AppData) BuildChartAPI(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// select last two no matter the match
-		lastPair1 := a.shiftArray()
-		lastPair2 := a.shiftArray()
+		lastPair1 := a.arrayShift()
+		lastPair2 := a.arrayShift()
 		a.Pairs = append(a.Pairs, Pair{
 			Seat1: lastPair1,
 			Seat2: lastPair2,
@@ -433,6 +436,9 @@ func (a *AppData) BuildChartAPI(w http.ResponseWriter, r *http.Request) {
 
 		a.ListCount++
 		a.Pairs = []Pair{}
+
+		// remove the placeholder attendee
+		a.Attendees = arrayPop(a.Attendees)
 
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -543,11 +549,18 @@ func (a *AppData) selectPartner(seat1 Attendee, c []Attendee) Attendee {
 	}
 }
 
-func (a *AppData) shiftArray() Attendee {
+func (a *AppData) arrayShift() Attendee {
 	t := a.Attendees[0]
 	a.Attendees = a.Attendees[1:]
 
 	return t
+}
+
+func arrayPop(s []Attendee) []Attendee {
+	index := len(s) - 1
+	ret := make([]Attendee, 0)
+	ret = append(ret, s[:index]...)
+	return append(ret, s[index+1:]...)
 }
 
 func (a *AppData) generateID() int {
