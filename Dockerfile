@@ -1,11 +1,20 @@
-FROM golang:latest
+FROM golang:alpine3.15 AS builder
 
-WORKDIR /app
+# Install Tools and dependencies
+RUN apk add --update --no-cache openssl-dev musl-dev zlib-dev curl tzdata
+
+WORKDIR /build
 
 COPY . .
 
-RUN ls
+RUN go build -o seating seating.go 
 
-RUN go build seating.go
 
-CMD ["./seating"]
+
+FROM alpine
+
+COPY --from=builder /build/seating .
+
+ENTRYPOINT ["/seating"]
+
+CMD ["/seating"]
