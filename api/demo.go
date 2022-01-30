@@ -1,8 +1,8 @@
 package api
 
 import (
-	"context"
-	"fmt"
+	// "context"
+	// "fmt"
 	"net/http"
 )
 
@@ -15,11 +15,11 @@ import (
 func (a *AppData) DemoAPI(w http.ResponseWriter, r *http.Request) {
 	a.LoadDemoData()
 
-	res, err := a.Conn.Database("testdb").Collection("testcol").InsertOne(context.TODO(), map[string]interface{}{"attendees": a.Attendees, "pairs": a.Pairs})
-	if err != nil {
-		fmt.Println("error: ", err)
-	}
-	fmt.Println(res.InsertedID)
+	// res, err := a.Conn.Database("testdb").Collection("testcol").InsertOne(context.TODO(), map[string]interface{}{"attendees": a.Attendees, "pairs": a.Pairs})
+	// if err != nil {
+	// 	fmt.Println("error: ", err)
+	// }
+	// fmt.Println(res.InsertedID)
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Cache-Control", "no-store")

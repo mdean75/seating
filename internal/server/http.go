@@ -7,16 +7,18 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"seating/internal/app"
+	"seating/internal/app/group"
 	"syscall"
 	"time"
 )
 
-func NewHTTP() *http.Server{
-	crs := NewRouterWithCors()
+func NewHTTP(controller *app.Controller) *http.Server{
+	crs := NewRouterWithCors(controller)
 
 
 	s := http.Server{
-		Addr:         "0.0.0.0:3000",
+		Addr:         "0.0.0.0:4000",
 		Handler:      crs,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
@@ -29,7 +31,19 @@ func Run() {
 	stop := make(chan os.Signal, 1)
 	kill := make(chan struct{}, 1)
 
-	srv := NewHTTP()
+	g, err := group.CreateController()
+	if err != nil {
+		fmt.Printf("unable to create controller, error: %v\n", err)
+		return
+	}
+
+	c := app.NewController(g)
+	if err != nil {
+		fmt.Printf("unable to create controller, error: %v\n", err)
+		return
+	}
+
+	srv := NewHTTP(c)
 
 	signal.Notify(stop, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
@@ -39,7 +53,7 @@ func Run() {
 			return
 		}
 	}()
-	log.Print("Server Started")
+	log.Print("Server Started: ", srv.Addr)
 
 	select {
 	case <-stop:

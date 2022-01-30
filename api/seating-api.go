@@ -219,10 +219,10 @@ func (a *AppData) BuildChartAPI(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write(b)
 
-		_, err = a.Conn.Database("testdb").Collection("testcol").InsertOne(context.TODO(), map[string]interface{}{"attendees": a.Attendees, "pairs": a.Pairs})
-		if err != nil {
-			fmt.Println("error: ", err)
-		}
+		// _, err = a.Conn.Database("testdb").Collection("testcol").InsertOne(context.TODO(), map[string]interface{}{"attendees": a.Attendees, "pairs": a.Pairs})
+		// if err != nil {
+		// 	fmt.Println("error: ", err)
+		// }
 
 	}(ctx)
 

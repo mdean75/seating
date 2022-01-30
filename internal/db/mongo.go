@@ -1,4 +1,4 @@
-package repository
+package db
 
 import (
 	"context"
@@ -13,7 +13,7 @@ type MongoConn struct {
 	Client *mongo.Client
 }
 
-func NewMongoDatabase(conn string) (*mongo.Client, error) {
+func NewMongoDatabase(conn string) (*MongoConn, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(conn))
@@ -29,8 +29,7 @@ func NewMongoDatabase(conn string) (*mongo.Client, error) {
 	}
 	cl := client
 
-	// return &MongoConn{
-	// 	Client: cl,
-	// }, nil
-	return cl, nil
+	return &MongoConn{
+		Client: cl,
+	}, nil
 }
