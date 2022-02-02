@@ -1,4 +1,4 @@
-package group
+package domain
 
 type Group struct {
 	ID string `bson:"_id,omitempty"`

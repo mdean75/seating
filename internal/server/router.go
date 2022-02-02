@@ -7,11 +7,11 @@ import (
 	"github.com/rs/cors"
 
 	"seating/api"
-	"seating/internal/app"
-	"seating/internal/app/group"
+	eventadapter "seating/internal/handlers/event"
+	groupadapter "seating/internal/handlers/group"
 )
 
-func NewRouterWithCors(controller *app.Controller) http.Handler {
+func NewRouterWithCors(groupService *groupadapter.HTTPHandler, eventService *eventadapter.HTTPHandler) http.Handler {
 	methods := []string{http.MethodPost, http.MethodGet, http.MethodOptions}
 	origins := []string{"http://localhost:4200", "https://letters2lostlovedones.com", "http://127.0.0.1:4200"}
 	headers := []string{"Content-Type"}
@@ -26,14 +26,14 @@ func NewRouterWithCors(controller *app.Controller) http.Handler {
 
 	r := mux.NewRouter()
 
-	addRoutes(r, controller)
+	addRoutes(r, groupService, eventService)
 	
 
 	crs := cors.New(opts)
 	return crs.Handler(r)
 }
 
-func addRoutes(r *mux.Router, controller *app.Controller) {
+func addRoutes(r *mux.Router, groupService *groupadapter.HTTPHandler, eventService *eventadapter.HTTPHandler) {
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("ok"))
 	})
@@ -56,6 +56,7 @@ func addRoutes(r *mux.Router, controller *app.Controller) {
 	r.Handle("/api/industry", a.GetIndustries()).Methods(http.MethodGet)
 	r.HandleFunc("/api/demo", a.DemoAPI).Methods(http.MethodGet)
 
-	r.HandleFunc("/group", group.HandleCreateGroup(controller.GroupController)).Methods(http.MethodPost)
+	r.HandleFunc("/group", groupService.HandleCreateGroup()).Methods(http.MethodPost)
+	r.HandleFunc("/event", eventService.HandleCreateEvent()).Methods(http.MethodPost)
 }
 

@@ -7,18 +7,25 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"seating/internal/app"
-	"seating/internal/app/group"
+
+	"seating/internal/app/services/eventservice"
+	"seating/internal/app/services/groupservice"
+	"seating/internal/config"
+	"seating/internal/db"
+	eventadapter "seating/internal/handlers/event"
+	groupadapter "seating/internal/handlers/group"
+	"seating/internal/repositories/eventrepo"
+	"seating/internal/repositories/grouprepo"
 	"syscall"
 	"time"
 )
 
-func NewHTTP(controller *app.Controller) *http.Server{
-	crs := NewRouterWithCors(controller)
+func NewHTTP(groupService *groupadapter.HTTPHandler, eventService *eventadapter.HTTPHandler) *http.Server{
+	crs := NewRouterWithCors(groupService, eventService)
 
 
 	s := http.Server{
-		Addr:         "0.0.0.0:4000",
+		Addr:         "0.0.0.0:3000",
 		Handler:      crs,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
@@ -31,19 +38,39 @@ func Run() {
 	stop := make(chan os.Signal, 1)
 	kill := make(chan struct{}, 1)
 
-	g, err := group.CreateController()
+	conf := config.EnvVar{}.LoadConfig()
+	conf.MongoConfig.SetDBConn("mongodb://127.0.0.1:27017") // need to remove
+	
+	// mongoClient, err := db.NewMongoDatabase()
+	mongoConn, err := db.NewMongoDatabase(conf.DBConn())
 	if err != nil {
-		fmt.Printf("unable to create controller, error: %v\n", err)
+		// return nil, err
+		fmt.Println("unable to connect to mongo: ", err)
 		return
 	}
 
-	c := app.NewController(g)
-	if err != nil {
-		fmt.Printf("unable to create controller, error: %v\n", err)
-		return
-	}
+	groupRepo := grouprepo.NewDAO(mongoConn, "testdb", "group")
+	eventrepo := eventrepo.NewDAO(mongoConn, "testdb", "event")
 
-	srv := NewHTTP(c)
+	groupService := groupservice.New(groupRepo)
+	eventService := eventservice.New(eventrepo)
+
+	groupHandler := groupadapter.NewHTTPHandler(groupService)
+	eventHandler := eventadapter.NewHTTPHandler(eventService)
+
+	// g, err := group.CreateController()
+	// if err != nil {
+	// 	fmt.Printf("unable to create controller, error: %v\n", err)
+	// 	return
+	// }
+
+	// c := app.NewController(g)
+	// if err != nil {
+	// 	fmt.Printf("unable to create controller, error: %v\n", err)
+	// 	return
+	// }
+
+	srv := NewHTTP(groupHandler, eventHandler)
 
 	signal.Notify(stop, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 

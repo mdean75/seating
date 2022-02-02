@@ -1,37 +1,31 @@
-package group
+package grouprepo
 
 import (
 	"context"
+	"seating/internal/app/ports"
 	"seating/internal/db"
+	groupadapter "seating/internal/handlers/group"
 
 	// "seating/internal/app/group"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
-
 type MongoDataStore struct {
 	*db.MongoConn
 	db  *mongo.Database
 	col *mongo.Collection
 }
 
-func NewDAO(dbconn *db.MongoConn, db, col string) Repository {
+func NewDAO(dbconn *db.MongoConn, db, col string) ports.GroupRepository {
 	dbx := dbconn.Client.Database(db)
 	conx := dbx.Collection(col)
 
 	return &MongoDataStore{dbconn, dbx, conx}
 }
 
-func NewGroup(displayName, shortName string) Group {
-	return Group{
-		DisplayName: displayName,
-		ShortName: shortName,
-	}
-}
-
-func (m *MongoDataStore) CreateGroup(displayName, shortName string) (ID, error) {
-	group := NewGroup(displayName, shortName)
+func (m *MongoDataStore) CreateGroup(displayName, shortName string) (ports.ID, error) {
+	group := groupadapter.NewGroupRequest(displayName, shortName)
 
 	res, err := m.db.Collection(m.col.Name()).InsertOne(context.TODO(), group)
 	if err != nil {
@@ -40,5 +34,5 @@ func (m *MongoDataStore) CreateGroup(displayName, shortName string) (ID, error) 
 
 	objId := res.InsertedID.(primitive.ObjectID)
 
-	return ID(objId.Hex()), nil
+	return ports.ID(objId.Hex()), nil
 }
