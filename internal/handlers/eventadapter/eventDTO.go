@@ -10,9 +10,9 @@ type Event struct {
 	GroupID string `json:"groupId"`
 }
 
-func NewEventRequest(groupID ID) Event {
-	return Event{
-		GroupID: string(groupID),
-		Date: time.Now(),
-	}
-}
+// func NewEventRequest(groupID ID) Event {
+// 	return Event{
+// 		GroupID: string(groupID),
+// 		Date: time.Now(),
+// 	}
+// }

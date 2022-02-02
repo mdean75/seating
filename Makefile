@@ -2,10 +2,10 @@
 	go list -u -m all
 
 run:
-	go run seating.go
+	go run cmd/main.go
 
 build: 
-	go build -o seating seating.go
+	go build -o out/bin/seating cmd/main.go
 
 clean:
 	rm seating 

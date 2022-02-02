@@ -28,7 +28,6 @@ func (h *HTTPHandler) HandleCreateEvent() http.HandlerFunc {
 			return
 		}
 
-		// domainEvent, err := c.Datastore.CreateEvent(ports.ID(event.GroupID))
 		domainEvent, err := h.eventService.CreateEvent(event.GroupID)
 		if err != nil {
 			fmt.Println(err)

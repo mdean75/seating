@@ -12,8 +12,8 @@ import (
 	"seating/internal/app/services/groupservice"
 	"seating/internal/config"
 	"seating/internal/db"
-	eventadapter "seating/internal/handlers/event"
-	groupadapter "seating/internal/handlers/group"
+	"seating/internal/handlers/eventadapter"
+	"seating/internal/handlers/groupadapter"
 	"seating/internal/repositories/eventrepo"
 	"seating/internal/repositories/grouprepo"
 	"syscall"
@@ -41,10 +41,8 @@ func Run() {
 	conf := config.EnvVar{}.LoadConfig()
 	conf.MongoConfig.SetDBConn("mongodb://127.0.0.1:27017") // need to remove
 	
-	// mongoClient, err := db.NewMongoDatabase()
 	mongoConn, err := db.NewMongoDatabase(conf.DBConn())
 	if err != nil {
-		// return nil, err
 		fmt.Println("unable to connect to mongo: ", err)
 		return
 	}
@@ -57,18 +55,6 @@ func Run() {
 
 	groupHandler := groupadapter.NewHTTPHandler(groupService)
 	eventHandler := eventadapter.NewHTTPHandler(eventService)
-
-	// g, err := group.CreateController()
-	// if err != nil {
-	// 	fmt.Printf("unable to create controller, error: %v\n", err)
-	// 	return
-	// }
-
-	// c := app.NewController(g)
-	// if err != nil {
-	// 	fmt.Printf("unable to create controller, error: %v\n", err)
-	// 	return
-	// }
 
 	srv := NewHTTP(groupHandler, eventHandler)
 
@@ -98,7 +84,6 @@ func Run() {
 	}()
 
 	if err := srv.Shutdown(ctx); err != nil {
-		//log.Fatalf("Server Shutdown Failed:%+v", err)
 		return
 	}
 	log.Print("Server Exited Properly")

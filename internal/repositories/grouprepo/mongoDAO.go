@@ -6,8 +6,6 @@ import (
 	"seating/internal/app/ports"
 	"seating/internal/db"
 
-	// "seating/internal/app/group"
-
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -39,7 +37,6 @@ func NewMongoGroupFromDomain(group domain.Group) Group {
 }
 
 func (m *MongoDataStore) Save(group domain.Group) (ports.ID, error) {
-	// group := groupadapter.NewGroupRequest(displayName, shortName)
 	g := NewMongoGroupFromDomain(group)
 
 	res, err := m.db.Collection(m.col.Name()).InsertOne(context.TODO(), g)

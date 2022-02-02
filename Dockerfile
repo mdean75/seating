@@ -7,13 +7,13 @@ WORKDIR /build
 
 COPY . .
 
-RUN go build -o seating seating.go 
+RUN go build -o out/bin/seating seating.go 
 
 
-
+# build final container
 FROM alpine
 
-COPY --from=builder /build/seating .
+COPY --from=builder /build/out/bin/seating .
 
 ENTRYPOINT ["/seating"]
 

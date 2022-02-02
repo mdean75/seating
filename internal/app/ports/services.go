@@ -3,7 +3,6 @@ package ports
 import "seating/internal/app/domain"
 
 type GroupService interface {
-	// CreateGroup(displayName, shortName string) (string, error)
 	CreateGroup(displayName, shortName string) (domain.Group, error)
 }
 

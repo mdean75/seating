@@ -39,7 +39,6 @@ func NewMongoEventFromDomain(domainEvent domain.Event) Event {
 }
 
 func (m *MongoDataStore) Save(event domain.Event) (ports.ID, error) {
-	// event := eventadapter.NewEventRequest(eventadapter.ID(groupId))
 	e := NewMongoEventFromDomain(event)
 
 	res, err := m.col.InsertOne(context.TODO(), e)

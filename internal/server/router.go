@@ -7,8 +7,8 @@ import (
 	"github.com/rs/cors"
 
 	"seating/api"
-	eventadapter "seating/internal/handlers/event"
-	groupadapter "seating/internal/handlers/group"
+	"seating/internal/handlers/eventadapter"
+	"seating/internal/handlers/groupadapter"
 )
 
 func NewRouterWithCors(groupService *groupadapter.HTTPHandler, eventService *eventadapter.HTTPHandler) http.Handler {
@@ -37,15 +37,9 @@ func addRoutes(r *mux.Router, groupService *groupadapter.HTTPHandler, eventServi
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("ok"))
 	})
-
-	// m, err := db.NewMongoDatabase("mongodb://127.0.0.1:27017")
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
 	
 	var a api.AppData
 	a.Industries = api.SetIndustries()
-	// a.Conn = m
 
 	r.HandleFunc("/api/reset", a.ResetAttendeesAPI).Methods(http.MethodGet)
 	r.Handle("/api/attendee", a.AddAttendeeAPI()).Methods(http.MethodGet, http.MethodOptions)
