@@ -1,10 +1,17 @@
 package domain
 
-// import "time"
+import "time"
 
-// type Event struct {
-// 	ID string `bson:"_id,omitempty"`
-// 	Date time.Time `bson:"data"`
-// 	GroupID string `bson:"groupId"`
-// }
+type Event struct {
+	ID string
+	Date time.Time
+	GroupID string
+}
 
+func NewEvent(id, groupID string, date time.Time) Event {
+	return Event{
+		ID: id,
+		Date: date,
+		GroupID: groupID,
+	}
+}

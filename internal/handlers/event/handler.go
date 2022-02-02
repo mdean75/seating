@@ -28,8 +28,8 @@ func (h *HTTPHandler) HandleCreateEvent() http.HandlerFunc {
 			return
 		}
 
-		// id, err := c.Datastore.CreateEvent(ports.ID(event.GroupID))
-		id, err := h.eventService.CreateEvent(event.GroupID)
+		// domainEvent, err := c.Datastore.CreateEvent(ports.ID(event.GroupID))
+		domainEvent, err := h.eventService.CreateEvent(event.GroupID)
 		if err != nil {
 			fmt.Println(err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -38,7 +38,15 @@ func (h *HTTPHandler) HandleCreateEvent() http.HandlerFunc {
 			return
 		}
 
+		event.ID = domainEvent.ID
+		event.Date = domainEvent.Date
+
+		b, err := json.Marshal(event)
+		if err != nil {
+			return 
+		}
+
 		w.WriteHeader(http.StatusCreated)
-		w.Write([]byte(id))
+		w.Write(b)
 	}
 }

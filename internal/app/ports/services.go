@@ -1,9 +1,12 @@
 package ports
 
+import "seating/internal/app/domain"
+
 type GroupService interface {
-	CreateGroup(displayName, shortName string) (string, error)
+	// CreateGroup(displayName, shortName string) (string, error)
+	CreateGroup(displayName, shortName string) (domain.Group, error)
 }
 
 type EventService interface {
-	CreateEvent(groupID string) (string, error)
+	CreateEvent(groupID string) (domain.Event, error)
 }

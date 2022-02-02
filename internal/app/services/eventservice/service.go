@@ -1,6 +1,10 @@
 package eventservice
 
-import "seating/internal/app/ports"
+import (
+	"seating/internal/app/domain"
+	"seating/internal/app/ports"
+	"time"
+)
 
 type service struct {
 	eventRepository ports.EventRepository
@@ -10,11 +14,14 @@ func New(eventRepo ports.EventRepository) *service {
 	return &service{eventRepository: eventRepo}
 }
 
-func (s*service) CreateEvent(groupID string) (string, error) {
-	id, err := s.eventRepository.CreateEvent(ports.ID(groupID))
+func (s*service) CreateEvent(groupID string) (domain.Event, error) {
+	event := domain.NewEvent("", groupID, time.Now())
+	id, err := s.eventRepository.Save(event)
 	if err != nil {
-		return "", err
+		return domain.Event{}, err
 	}
 
-	return string(id), nil
+	event.ID = string(id)
+
+	return event, nil
 }

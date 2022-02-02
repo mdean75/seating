@@ -2,9 +2,10 @@ package eventrepo
 
 import (
 	"context"
+	"seating/internal/app/domain"
 	"seating/internal/app/ports"
 	"seating/internal/db"
-	eventadapter "seating/internal/handlers/event"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -23,10 +24,25 @@ func NewDAO(dbconn *db.MongoConn, db, col string) ports.EventRepository {
 	return &MongoDataStore{dbconn, dbx, conx}
 }
 
-func (m *MongoDataStore) CreateEvent(groupId ports.ID) (ports.ID, error) {
-	event := eventadapter.NewEventRequest(eventadapter.ID(groupId))
+type Event struct {
+	ID string `bson:"_id,omitempty"`
+	Date time.Time `bson:"date"`
+	GroupID string `bson:"groupId"`
+}
 
-	res, err := m.col.InsertOne(context.TODO(), event)
+func NewMongoEventFromDomain(domainEvent domain.Event) Event {
+	return Event{
+		ID: domainEvent.ID,
+		Date: domainEvent.Date,
+		GroupID: domainEvent.GroupID,
+	}
+}
+
+func (m *MongoDataStore) Save(event domain.Event) (ports.ID, error) {
+	// event := eventadapter.NewEventRequest(eventadapter.ID(groupId))
+	e := NewMongoEventFromDomain(event)
+
+	res, err := m.col.InsertOne(context.TODO(), e)
 	if err != nil {
 		return "", err
 	}

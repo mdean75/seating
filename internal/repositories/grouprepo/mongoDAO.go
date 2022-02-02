@@ -2,9 +2,9 @@ package grouprepo
 
 import (
 	"context"
+	"seating/internal/app/domain"
 	"seating/internal/app/ports"
 	"seating/internal/db"
-	groupadapter "seating/internal/handlers/group"
 
 	// "seating/internal/app/group"
 
@@ -24,10 +24,25 @@ func NewDAO(dbconn *db.MongoConn, db, col string) ports.GroupRepository {
 	return &MongoDataStore{dbconn, dbx, conx}
 }
 
-func (m *MongoDataStore) CreateGroup(displayName, shortName string) (ports.ID, error) {
-	group := groupadapter.NewGroupRequest(displayName, shortName)
+type Group struct {
+	ID string `bson:"_id,omitempty"`
+	DisplayName string `bson:"displayName"`
+	ShortName string `bson:"shortName"`
+}
 
-	res, err := m.db.Collection(m.col.Name()).InsertOne(context.TODO(), group)
+func NewMongoGroupFromDomain(group domain.Group) Group {
+	return Group{
+		ID: group.ID,
+		DisplayName: group.DisplayName,
+		ShortName: group.ShortName,
+	}
+}
+
+func (m *MongoDataStore) Save(group domain.Group) (ports.ID, error) {
+	// group := groupadapter.NewGroupRequest(displayName, shortName)
+	g := NewMongoGroupFromDomain(group)
+
+	res, err := m.db.Collection(m.col.Name()).InsertOne(context.TODO(), g)
 	if err != nil {
 		return "", err
 	}
