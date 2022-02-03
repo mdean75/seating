@@ -1,0 +1,21 @@
+{
+    "name": "Group",
+    "_id": "ObjectId()",
+    "groupId": "ococ",
+    "groupName": "O Fallon Chamber of Commerce",
+    "users": [
+      {
+        "name": "michael",
+        "id": "id num",
+        "roles": [
+          "admin",
+          "user"
+        ],
+        "active": true
+      }
+    ],
+    "meetingLeaders": [
+        "",
+        ""
+    ]
+  }

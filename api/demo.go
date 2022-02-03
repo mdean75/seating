@@ -1,16 +1,25 @@
 package api
 
-import "net/http"
+import (
+	// "context"
+	// "fmt"
+	"net/http"
+)
 
-func (a *AppData) Demo(w http.ResponseWriter, r *http.Request) {
-	a.LoadDemoData()
+// func (a *AppData) Demo(w http.ResponseWriter, r *http.Request) {
+// 	a.LoadDemoData()
 
-	http.Redirect(w, r, "/", http.StatusFound)
-}
+// 	http.Redirect(w, r, "/", http.StatusFound)
+// }
 
 func (a *AppData) DemoAPI(w http.ResponseWriter, r *http.Request) {
 	a.LoadDemoData()
 
+	// res, err := a.Conn.Database("testdb").Collection("testcol").InsertOne(context.TODO(), map[string]interface{}{"attendees": a.Attendees, "pairs": a.Pairs})
+	// if err != nil {
+	// 	fmt.Println("error: ", err)
+	// }
+	// fmt.Println(res.InsertedID)
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Cache-Control", "no-store")

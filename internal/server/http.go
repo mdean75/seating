@@ -1,0 +1,90 @@
+package server
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+
+	"seating/internal/app/services/eventservice"
+	"seating/internal/app/services/groupservice"
+	"seating/internal/config"
+	"seating/internal/db"
+	"seating/internal/handlers/eventadapter"
+	"seating/internal/handlers/groupadapter"
+	"seating/internal/repositories/eventrepo"
+	"seating/internal/repositories/grouprepo"
+	"syscall"
+	"time"
+)
+
+func NewHTTP(groupService *groupadapter.HTTPHandler, eventService *eventadapter.HTTPHandler) *http.Server{
+	crs := NewRouterWithCors(groupService, eventService)
+
+
+	s := http.Server{
+		Addr:         "0.0.0.0:3000",
+		Handler:      crs,
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 15 * time.Second,
+	}
+
+	return &s
+}
+
+func Run() {
+	stop := make(chan os.Signal, 1)
+	kill := make(chan struct{}, 1)
+
+	conf := config.EnvVar{}.LoadConfig()
+	conf.MongoConfig.SetDBConn("mongodb://127.0.0.1:27017") // need to remove
+	
+	mongoConn, err := db.NewMongoDatabase(conf.DBConn())
+	if err != nil {
+		fmt.Println("unable to connect to mongo: ", err)
+		return
+	}
+
+	groupRepo := grouprepo.NewDAO(mongoConn, "testdb", "group")
+	eventrepo := eventrepo.NewDAO(mongoConn, "testdb", "event")
+
+	groupService := groupservice.New(groupRepo)
+	eventService := eventservice.New(eventrepo)
+
+	groupHandler := groupadapter.NewHTTPHandler(groupService)
+	eventHandler := eventadapter.NewHTTPHandler(eventService)
+
+	srv := NewHTTP(groupHandler, eventHandler)
+
+	signal.Notify(stop, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil {
+			fmt.Println(err)
+			return
+		}
+	}()
+	log.Print("Server Started: ", srv.Addr)
+
+	select {
+	case <-stop:
+		fmt.Println("os stop signal received")
+	case <-kill:
+		fmt.Println("kill signal received")
+	}
+
+	log.Print("Server Stopped")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer func() {
+		// extra handling here
+		cancel()
+	}()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		return
+	}
+	log.Print("Server Exited Properly")
+}

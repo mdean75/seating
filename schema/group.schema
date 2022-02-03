@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "name - this was just for creating the schema itself": {
+      "type": "string"
+    },
+    "_id": {
+      "type": "string"
+    },
+    "groupId": {
+      "type": "string"
+    },
+    "groupName": {
+      "type": "string"
+    },
+    "users": {
+      "type": "array",
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "roles": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "active": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "name",
+            "id",
+            "roles",
+            "active"
+          ]
+        }
+      ]
+    },
+    "meetingLeaders": {
+      "type": "array",
+      "items": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        }
+      ]
+    }
+  },
+  "required": [
+    "name",
+    "_id",
+    "groupId",
+    "groupName",
+    "users",
+    "meetingLeaders"
+  ]
+}

@@ -1,0 +1,31 @@
+generate schema from json
+
+https://www.liquid-technologies.com/online-json-to-schema-converter
+
+ports
+  interfaces that define communication
+
+  handlers
+
+adapters
+  transformation from actor to core
+  repositories
+  driver adapters will be in packages in internal/handlers
+
+app
+  controller
+
+domain or core
+  business logic
+
+--------
+
+actors
+  drivers or primary
+    trigger communication with core
+      ex. cli
+  driven or secondary
+    expect core to be trigger for communication
+      ex. db
+
+adapters "plug" into ports
