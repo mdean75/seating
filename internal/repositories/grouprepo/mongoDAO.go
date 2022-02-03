@@ -6,6 +6,7 @@ import (
 	"seating/internal/app/ports"
 	"seating/internal/db"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -36,6 +37,10 @@ func NewMongoGroupFromDomain(group domain.Group) Group {
 	}
 }
 
+func convertMongoGroupToDomain(group Group) domain.Group {
+	return domain.NewGroup(group.ID, group.DisplayName, group.ShortName)
+}
+
 func (m *MongoDataStore) Save(group domain.Group) (ports.ID, error) {
 	g := NewMongoGroupFromDomain(group)
 
@@ -47,4 +52,19 @@ func (m *MongoDataStore) Save(group domain.Group) (ports.ID, error) {
 	objId := res.InsertedID.(primitive.ObjectID)
 
 	return ports.ID(objId.Hex()), nil
+}
+
+func (m *MongoDataStore) Get(groupID string) (domain.Group, error) {
+	var group Group
+	id, err := primitive.ObjectIDFromHex(groupID)
+	if err != nil {
+		return domain.Group{}, err
+	}
+
+	err = m.col.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&group)
+	if err != nil {
+		return domain.Group{}, nil
+	}
+
+	return convertMongoGroupToDomain(group), nil
 }

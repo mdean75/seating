@@ -52,6 +52,7 @@ func addRoutes(r *mux.Router, groupService *groupadapter.HTTPHandler, eventServi
 	r.HandleFunc("/api/demo", a.DemoAPI).Methods(http.MethodGet)
 
 	r.HandleFunc("/group", groupService.HandleCreateGroup()).Methods(http.MethodPost)
+	r.HandleFunc("/group/{id}", groupService.HandleGetGroup()).Methods(http.MethodGet)
 
 	r.HandleFunc("/event", eventService.HandleCreateEvent()).Methods(http.MethodPost)
 	r.HandleFunc("/event/{id}", eventService.HandleGetEvent()).Methods(http.MethodGet)

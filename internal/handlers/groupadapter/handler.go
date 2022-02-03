@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"seating/internal/app/ports"
+
+	"github.com/gorilla/mux"
 )
 
 type HTTPHandler struct {
@@ -56,5 +58,36 @@ func (h *HTTPHandler) HandleCreateGroup() http.HandlerFunc {
 		w.WriteHeader(http.StatusCreated)
 		w.Write(b)
 		
+	}
+}
+
+func (h *HTTPHandler) HandleGetGroup() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		id := vars["id"]
+
+		if id == "" {
+			// TODO: handle this much better
+			w.Write([]byte("id value is empty"))
+			return
+		}
+
+		group, err := h.groupService.GetGroup(id)
+		if err != nil {
+			fmt.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		groupResponse := ConvertJSONGroupFromDomain(group)
+
+		b, err := json.Marshal(groupResponse)
+		if err != nil {
+			return 
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write(b)
 	}
 }

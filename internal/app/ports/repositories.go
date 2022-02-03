@@ -6,6 +6,7 @@ type ID string
 
 type GroupRepository interface {
 	Save(domain.Group) (ID, error)
+	Get(string) (domain.Group, error)
 }
 
 type EventRepository interface {

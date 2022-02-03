@@ -24,3 +24,12 @@ func (s *service) CreateGroup(displayName, shortName string) (domain.Group, erro
 	group.ID = string(id)
 	return group, nil
 }
+
+func (s *service) GetGroup(groupID string) (domain.Group, error) {
+	group, err := s.groupRepository.Get(groupID)
+	if err != nil {
+		return domain.Group{}, nil
+	}
+
+	return group, nil
+}
