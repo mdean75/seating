@@ -14,6 +14,7 @@ RUN go build -o out/bin/seating seating.go
 FROM alpine
 
 COPY --from=builder /build/out/bin/seating .
+COPY --from=builder /build/.env .
 
 ENTRYPOINT ["/seating"]
 

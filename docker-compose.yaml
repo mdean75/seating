@@ -11,6 +11,11 @@ services:
       - '3000:3000'
     depends_on:
       - mongo
+    # create .env file with the following env variables
+    #  dbconn=mongodb://server_address:port
+    env_file:
+      - .env
+    
   mongo:
     image: mongo:latest
     container_name: mongodb

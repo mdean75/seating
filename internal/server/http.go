@@ -20,8 +20,8 @@ import (
 	"time"
 )
 
-func NewHTTP(groupService *groupadapter.HTTPHandler, eventService *eventadapter.HTTPHandler) *http.Server{
-	crs := NewRouterWithCors(groupService, eventService)
+func NewHTTP(groupService *groupadapter.HTTPHandler, eventService *eventadapter.HTTPHandler, conf config.Configuration) *http.Server{
+	crs := NewRouterWithCors(groupService, eventService, conf)
 
 
 	s := http.Server{
@@ -39,7 +39,6 @@ func Run() {
 	kill := make(chan struct{}, 1)
 
 	conf := config.EnvVar{}.LoadConfig()
-	conf.MongoConfig.SetDBConn("mongodb://127.0.0.1:27017") // need to remove
 	
 	mongoConn, err := db.NewMongoDatabase(conf.DBConn())
 	if err != nil {
@@ -56,7 +55,7 @@ func Run() {
 	groupHandler := groupadapter.NewHTTPHandler(groupService)
 	eventHandler := eventadapter.NewHTTPHandler(eventService)
 
-	srv := NewHTTP(groupHandler, eventHandler)
+	srv := NewHTTP(groupHandler, eventHandler, conf)
 
 	signal.Notify(stop, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 

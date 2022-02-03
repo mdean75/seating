@@ -8,4 +8,6 @@ type GroupService interface {
 
 type EventService interface {
 	CreateEvent(groupID string) (domain.Event, error)
+	GetEvent(eventID string) (domain.Event, error)
+	DeleteEvent(eventID string) error
 }

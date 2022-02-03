@@ -25,3 +25,16 @@ func (s*service) CreateEvent(groupID string) (domain.Event, error) {
 
 	return event, nil
 }
+
+func (s *service) GetEvent(eventID string) (domain.Event, error) {
+	event, err := s.eventRepository.Get(eventID)
+	if err != nil {
+		return domain.Event{}, err
+	}
+
+	return event, nil
+}
+
+func (s *service) DeleteEvent(eventID string) error {
+	return s.eventRepository.Delete(eventID)
+}

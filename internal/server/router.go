@@ -7,11 +7,12 @@ import (
 	"github.com/rs/cors"
 
 	"seating/api"
+	"seating/internal/config"
 	"seating/internal/handlers/eventadapter"
 	"seating/internal/handlers/groupadapter"
 )
 
-func NewRouterWithCors(groupService *groupadapter.HTTPHandler, eventService *eventadapter.HTTPHandler) http.Handler {
+func NewRouterWithCors(groupService *groupadapter.HTTPHandler, eventService *eventadapter.HTTPHandler, conf config.Configuration) http.Handler {
 	methods := []string{http.MethodPost, http.MethodGet, http.MethodOptions}
 	origins := []string{"http://localhost:4200", "https://letters2lostlovedones.com", "http://127.0.0.1:4200"}
 	headers := []string{"Content-Type"}
@@ -21,7 +22,7 @@ func NewRouterWithCors(groupService *groupadapter.HTTPHandler, eventService *eve
 		AllowedOrigins:     origins,
 		AllowedHeaders:     headers,
 		OptionsPassthrough: true,
-		Debug:              true,
+		Debug:              conf.DebugCors,
 	}
 
 	r := mux.NewRouter()
@@ -51,6 +52,9 @@ func addRoutes(r *mux.Router, groupService *groupadapter.HTTPHandler, eventServi
 	r.HandleFunc("/api/demo", a.DemoAPI).Methods(http.MethodGet)
 
 	r.HandleFunc("/group", groupService.HandleCreateGroup()).Methods(http.MethodPost)
+
 	r.HandleFunc("/event", eventService.HandleCreateEvent()).Methods(http.MethodPost)
+	r.HandleFunc("/event/{id}", eventService.HandleGetEvent()).Methods(http.MethodGet)
+	r.HandleFunc("/event/{id}", eventService.HandleDeleteEvent()).Methods(http.MethodDelete)
 }
 

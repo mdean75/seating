@@ -1,6 +1,9 @@
 package eventadapter
 
-import "time"
+import (
+	"seating/internal/app/domain"
+	"time"
+)
 
 type ID string
 
@@ -16,3 +19,11 @@ type Event struct {
 // 		Date: time.Now(),
 // 	}
 // }
+
+func ConvertJSONEventFromDomain(event domain.Event) Event {
+	return Event{
+		ID: event.ID,
+		Date: event.Date,
+		GroupID: event.GroupID,
+	}
+}

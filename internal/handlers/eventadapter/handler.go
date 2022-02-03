@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"seating/internal/app/ports"
+
+	"github.com/gorilla/mux"
 )
 
 type HTTPHandler struct {
@@ -47,5 +49,59 @@ func (h *HTTPHandler) HandleCreateEvent() http.HandlerFunc {
 
 		w.WriteHeader(http.StatusCreated)
 		w.Write(b)
+	}
+}
+
+func (h *HTTPHandler) HandleGetEvent() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		id := vars["id"]
+
+		if id == "" {
+			// TODO: handle this much better
+			w.Write([]byte("id value is empty"))
+			return
+		}
+
+		event, err := h.eventService.GetEvent(id)
+		if err != nil {
+			fmt.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		eventResponse := ConvertJSONEventFromDomain(event)
+
+		b, err := json.Marshal(eventResponse)
+		if err != nil {
+			return 
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write(b)
+	}
+}
+
+func (h *HTTPHandler) HandleDeleteEvent() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		id := vars["id"]
+
+		if id == "" {
+			// TODO: handle this much better
+			w.Write([]byte("id value is empty"))
+			return
+		}
+
+		err := h.eventService.DeleteEvent(id)
+		if err != nil {
+			fmt.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		w.Write([]byte("resource deleted"))
 	}
 }
