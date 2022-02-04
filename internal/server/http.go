@@ -8,20 +8,23 @@ import (
 	"os"
 	"os/signal"
 
+	"seating/internal/app/services/attendeeservice"
 	"seating/internal/app/services/eventservice"
 	"seating/internal/app/services/groupservice"
 	"seating/internal/config"
 	"seating/internal/db"
+	"seating/internal/handlers/attendeeadapter"
 	"seating/internal/handlers/eventadapter"
 	"seating/internal/handlers/groupadapter"
+	"seating/internal/repositories/attendeerepo"
 	"seating/internal/repositories/eventrepo"
 	"seating/internal/repositories/grouprepo"
 	"syscall"
 	"time"
 )
 
-func NewHTTP(groupService *groupadapter.HTTPHandler, eventService *eventadapter.HTTPHandler, conf config.Configuration) *http.Server{
-	crs := NewRouterWithCors(groupService, eventService, conf)
+func NewHTTP(groupService *groupadapter.HTTPHandler, eventService *eventadapter.HTTPHandler, attendeeService *attendeeadapter.HTTPHandler, conf config.Configuration) *http.Server{
+	crs := NewRouterWithCors(groupService, eventService, attendeeService, conf)
 
 
 	s := http.Server{
@@ -48,14 +51,17 @@ func Run() {
 
 	groupRepo := grouprepo.NewDAO(mongoConn, "testdb", "group")
 	eventrepo := eventrepo.NewDAO(mongoConn, "testdb", "event")
+	attendeeRepo := attendeerepo.NewDAO(mongoConn, "testdb", "attendee")
 
 	groupService := groupservice.New(groupRepo)
 	eventService := eventservice.New(eventrepo)
+	attendeeService := attendeeservice.New(attendeeRepo)
 
 	groupHandler := groupadapter.NewHTTPHandler(groupService)
 	eventHandler := eventadapter.NewHTTPHandler(eventService)
+	attendeeHandler := attendeeadapter.NewHTTPHandler(attendeeService)
 
-	srv := NewHTTP(groupHandler, eventHandler, conf)
+	srv := NewHTTP(groupHandler, eventHandler, attendeeHandler, conf)
 
 	signal.Notify(stop, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 

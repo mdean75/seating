@@ -91,3 +91,27 @@ func (h *HTTPHandler) HandleGetGroup() http.HandlerFunc {
 		w.Write(b)
 	}
 }
+
+func (h *HTTPHandler) HandleDeleteGroup() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		id := vars["id"]
+
+		if id == "" {
+			// TODO: handle this much better
+			w.Write([]byte("id value is empty"))
+			return
+		}
+
+		err := h.groupService.DeleteGroup(id)
+		if err != nil {
+			fmt.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("successfully delete group"))
+	}
+}

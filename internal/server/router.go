@@ -8,11 +8,12 @@ import (
 
 	"seating/api"
 	"seating/internal/config"
+	"seating/internal/handlers/attendeeadapter"
 	"seating/internal/handlers/eventadapter"
 	"seating/internal/handlers/groupadapter"
 )
 
-func NewRouterWithCors(groupService *groupadapter.HTTPHandler, eventService *eventadapter.HTTPHandler, conf config.Configuration) http.Handler {
+func NewRouterWithCors(groupService *groupadapter.HTTPHandler, eventService *eventadapter.HTTPHandler, attendeeService *attendeeadapter.HTTPHandler, conf config.Configuration) http.Handler {
 	methods := []string{http.MethodPost, http.MethodGet, http.MethodOptions}
 	origins := []string{"http://localhost:4200", "https://letters2lostlovedones.com", "http://127.0.0.1:4200"}
 	headers := []string{"Content-Type"}
@@ -27,14 +28,14 @@ func NewRouterWithCors(groupService *groupadapter.HTTPHandler, eventService *eve
 
 	r := mux.NewRouter()
 
-	addRoutes(r, groupService, eventService)
+	addRoutes(r, groupService, eventService, attendeeService)
 	
 
 	crs := cors.New(opts)
 	return crs.Handler(r)
 }
 
-func addRoutes(r *mux.Router, groupService *groupadapter.HTTPHandler, eventService *eventadapter.HTTPHandler) {
+func addRoutes(r *mux.Router, groupService *groupadapter.HTTPHandler, eventService *eventadapter.HTTPHandler, attendeeService *attendeeadapter.HTTPHandler) {
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("ok"))
 	})
@@ -53,9 +54,12 @@ func addRoutes(r *mux.Router, groupService *groupadapter.HTTPHandler, eventServi
 
 	r.HandleFunc("/group", groupService.HandleCreateGroup()).Methods(http.MethodPost)
 	r.HandleFunc("/group/{id}", groupService.HandleGetGroup()).Methods(http.MethodGet)
+	r.HandleFunc("/group/{id}", groupService.HandleDeleteGroup()).Methods(http.MethodDelete)
 
 	r.HandleFunc("/event", eventService.HandleCreateEvent()).Methods(http.MethodPost)
 	r.HandleFunc("/event/{id}", eventService.HandleGetEvent()).Methods(http.MethodGet)
 	r.HandleFunc("/event/{id}", eventService.HandleDeleteEvent()).Methods(http.MethodDelete)
+
+	r.HandleFunc("/attendee", attendeeService.HandleCreateAttendee()).Methods(http.MethodPost)
 }
 

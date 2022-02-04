@@ -28,8 +28,12 @@ func (s *service) CreateGroup(displayName, shortName string) (domain.Group, erro
 func (s *service) GetGroup(groupID string) (domain.Group, error) {
 	group, err := s.groupRepository.Get(groupID)
 	if err != nil {
-		return domain.Group{}, nil
+		return domain.Group{}, err
 	}
 
 	return group, nil
+}
+
+func (s *service) DeleteGroup(groupID string) error {
+	return s.groupRepository.Delete(groupID)
 }

@@ -2,6 +2,7 @@ package grouprepo
 
 import (
 	"context"
+	"fmt"
 	"seating/internal/app/domain"
 	"seating/internal/app/ports"
 	"seating/internal/db"
@@ -61,10 +62,35 @@ func (m *MongoDataStore) Get(groupID string) (domain.Group, error) {
 		return domain.Group{}, err
 	}
 
-	err = m.col.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&group)
-	if err != nil {
-		return domain.Group{}, nil
+	result := m.col.FindOne(context.TODO(), bson.M{"_id": id})//.Decode(&group)
+	if result.Err() != nil {
+		return domain.Group{}, result.Err()
+	}
+
+	if err := result.Decode(&group); err != nil {
+		return domain.Group{}, err
 	}
 
 	return convertMongoGroupToDomain(group), nil
+}
+
+
+var ErrUnableToDeleteResouce error = fmt.Errorf("unable to delete the specified resource")
+
+func (m *MongoDataStore) Delete(groupID string) error {
+	id, err := primitive.ObjectIDFromHex(groupID)
+	if err != nil {
+		return err
+	}
+
+	result, err := m.col.DeleteOne(context.TODO(), bson.M{"_id": id})
+	if err != nil {
+		return err
+	}
+
+	if result.DeletedCount == 0 {
+		return ErrUnableToDeleteResouce
+	}
+
+	return nil
 }
