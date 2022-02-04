@@ -8,23 +8,27 @@ import (
 	"os"
 	"os/signal"
 
+	"seating/internal/app"
 	"seating/internal/app/services/attendeeservice"
 	"seating/internal/app/services/eventservice"
 	"seating/internal/app/services/groupservice"
+	"seating/internal/app/services/industryservice"
 	"seating/internal/config"
 	"seating/internal/db"
 	"seating/internal/handlers/attendeeadapter"
 	"seating/internal/handlers/eventadapter"
 	"seating/internal/handlers/groupadapter"
+	"seating/internal/handlers/industryadapter"
 	"seating/internal/repositories/attendeerepo"
 	"seating/internal/repositories/eventrepo"
 	"seating/internal/repositories/grouprepo"
+	"seating/internal/repositories/industryrepo"
 	"syscall"
 	"time"
 )
 
-func NewHTTP(groupService *groupadapter.HTTPHandler, eventService *eventadapter.HTTPHandler, attendeeService *attendeeadapter.HTTPHandler, conf config.Configuration) *http.Server{
-	crs := NewRouterWithCors(groupService, eventService, attendeeService, conf)
+func NewHTTP(controller *app.Controller, conf config.Configuration) *http.Server{
+	crs := NewRouterWithCors(controller, conf)
 
 
 	s := http.Server{
@@ -52,16 +56,21 @@ func Run() {
 	groupRepo := grouprepo.NewDAO(mongoConn, "testdb", "group")
 	eventrepo := eventrepo.NewDAO(mongoConn, "testdb", "event")
 	attendeeRepo := attendeerepo.NewDAO(mongoConn, "testdb", "attendee")
+	industryRepo := industryrepo.NewDAO(mongoConn, "testdb", "industry")
 
 	groupService := groupservice.New(groupRepo)
 	eventService := eventservice.New(eventrepo)
 	attendeeService := attendeeservice.New(attendeeRepo)
+	industryService := industryservice.New(industryRepo)
 
 	groupHandler := groupadapter.NewHTTPHandler(groupService)
 	eventHandler := eventadapter.NewHTTPHandler(eventService)
 	attendeeHandler := attendeeadapter.NewHTTPHandler(attendeeService)
+	industryHandler := industryadapter.NewHTTPHandler(industryService)
 
-	srv := NewHTTP(groupHandler, eventHandler, attendeeHandler, conf)
+	appController := app.NewController(groupHandler, eventHandler, attendeeHandler, industryHandler)
+
+	srv := NewHTTP(appController, conf)
 
 	signal.Notify(stop, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 

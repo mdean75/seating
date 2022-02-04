@@ -16,4 +16,12 @@ type EventService interface {
 
 type AttendeeService interface {
 	CreateAttendee(name, companyName, industry string) (domain.Attendee, error)
+	GetAttendee(attendeeID string) (domain.Attendee, error)
+	DeleteAttendee(attendeeID string) error
+}
+
+type IndustryService interface {
+	CreateIndustry(name string) (domain.Industry, error)
+	GetIndustry(industryID string) (domain.Industry, error)
+	DeleteIndustry(industryID string) error
 }

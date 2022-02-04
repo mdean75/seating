@@ -24,3 +24,11 @@ func (s *service) CreateAttendee(name, companyName, industry string) (domain.Att
 
 	return attendee, nil
 }
+
+func (s *service) GetAttendee(attendeeID string) (domain.Attendee, error) {
+	return s.attendeeRepository.Get(attendeeID)
+}
+
+func (s *service) DeleteAttendee(attendeeID string) error {
+	return s.attendeeRepository.Delete(attendeeID)
+}

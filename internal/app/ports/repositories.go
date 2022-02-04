@@ -18,4 +18,12 @@ type EventRepository interface {
 
 type AttendeeRepository interface {
 	Save(domain.Attendee) (ID, error)
+	Get(string) (domain.Attendee, error)
+	Delete(string) error
+}
+
+type IndustryRepository interface {
+	Save(domain.Industry) (ID, error)
+	Get(string) (domain.Industry, error)
+	Delete(string) error
 }

@@ -1,4 +1,4 @@
-package attendeeadapter
+package industryadapter
 
 import (
 	"encoding/json"
@@ -10,18 +10,18 @@ import (
 )
 
 type HTTPHandler struct {
-	attendeeservice ports.AttendeeService
+	industryservice ports.IndustryService
 }
 
-func NewHTTPHandler(attendeeService ports.AttendeeService) *HTTPHandler {
-	return &HTTPHandler{attendeeservice: attendeeService}
+func NewHTTPHandler(industryService ports.IndustryService) *HTTPHandler {
+	return &HTTPHandler{industryservice: industryService}
 }
 
-func (h *HTTPHandler) HandleCreateAttendee() http.HandlerFunc {
+func (h *HTTPHandler) HandleCreateIndustry() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var attendee Attendee
+		var industry Industry
 
-		err := json.NewDecoder(r.Body).Decode(&attendee)
+		err := json.NewDecoder(r.Body).Decode(&industry)
 		if err != nil {
 			fmt.Println("error unable to decode body: ", err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -30,7 +30,7 @@ func (h *HTTPHandler) HandleCreateAttendee() http.HandlerFunc {
 			return
 		}
 
-		domainAttendee, err := h.attendeeservice.CreateAttendee(attendee.Name, attendee.CompanyName, attendee.Industry)
+		domainIndustry, err := h.industryservice.CreateIndustry(industry.Name)
 		if err != nil {
 			fmt.Println(err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -39,9 +39,9 @@ func (h *HTTPHandler) HandleCreateAttendee() http.HandlerFunc {
 			return
 		}
 
-		attendee.ID = domainAttendee.ID
+		industry.ID = domainIndustry.ID
 
-		b, err := json.Marshal(attendee)
+		b, err := json.Marshal(industry)
 		if err != nil {
 			return 
 		}
@@ -62,7 +62,7 @@ func (h *HTTPHandler) HandleGet() http.HandlerFunc {
 			return
 		}
 
-		attendee, err := h.attendeeservice.GetAttendee(id)
+		industry, err := h.industryservice.GetIndustry(id)
 		if err != nil {
 			fmt.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -70,7 +70,7 @@ func (h *HTTPHandler) HandleGet() http.HandlerFunc {
 			return
 		}
 
-		eventResponse := convertJSONAttendeeFromDomain(attendee)
+		eventResponse := convertJSONIndustryFromDomain(industry)
 
 		b, err := json.Marshal(eventResponse)
 		if err != nil {
@@ -93,7 +93,7 @@ func (h *HTTPHandler) HandleDelete() http.HandlerFunc {
 			return
 		}
 
-		err := h.attendeeservice.DeleteAttendee(id)
+		err := h.industryservice.DeleteIndustry(id)
 		if err != nil {
 			fmt.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
