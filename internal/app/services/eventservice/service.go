@@ -14,8 +14,9 @@ func New(eventRepo ports.EventRepository) *service {
 	return &service{eventRepository: eventRepo}
 }
 
-func (s*service) CreateEvent(groupID string) (domain.Event, error) {
-	event := domain.NewEvent("", groupID, time.Now())
+func (s *service) CreateEvent(groupID string, group domain.Group) (domain.Event, error) {
+	// TODO: We will want this to be not the current time but rather the date of the event
+	event := domain.NewEvent("", groupID, time.Now(), group)
 	id, err := s.eventRepository.Save(event)
 	if err != nil {
 		return domain.Event{}, err

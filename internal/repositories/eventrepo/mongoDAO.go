@@ -6,6 +6,7 @@ import (
 	"seating/internal/app/domain"
 	"seating/internal/app/ports"
 	"seating/internal/db"
+	"seating/internal/repositories/grouprepo"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -27,24 +28,27 @@ func NewDAO(dbconn *db.MongoConn, db, col string) ports.EventRepository {
 }
 
 type Event struct {
-	ID string `bson:"_id,omitempty"`
-	Date time.Time `bson:"date"`
-	GroupID string `bson:"groupId"`
+	ID      string          `bson:"_id,omitempty"`
+	Date    time.Time       `bson:"date"`
+	GroupID string          `bson:"groupId"`
+	Group   grouprepo.Group `bson:"group"`
 }
 
 func NewMongoEventFromDomain(domainEvent domain.Event) Event {
 	return Event{
-		ID: domainEvent.ID,
-		Date: domainEvent.Date,
+		ID:      domainEvent.ID,
+		Date:    domainEvent.Date,
 		GroupID: domainEvent.GroupID,
+		Group:   grouprepo.NewMongoGroupFromDomain(domainEvent.Group),
 	}
 }
 
 func convertMongoEventToDomain(event Event) domain.Event {
-	return domain.NewEvent(event.ID, event.GroupID, event.Date)
+	return domain.NewEvent(event.ID, event.GroupID, event.Date, grouprepo.ConvertMongoGroupToDomain(event.Group))
 }
 
 func (m *MongoDataStore) Save(event domain.Event) (ports.ID, error) {
+
 	e := NewMongoEventFromDomain(event)
 
 	res, err := m.col.InsertOne(context.TODO(), e)
@@ -70,7 +74,7 @@ func (m *MongoDataStore) Get(eventID string) (domain.Event, error) {
 	}
 
 	return convertMongoEventToDomain(event), nil
-	
+
 }
 
 var ErrUnableToDeleteResouce error = fmt.Errorf("unable to delete the specified resource")

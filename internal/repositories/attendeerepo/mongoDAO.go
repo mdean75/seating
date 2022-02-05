@@ -21,23 +21,23 @@ type MongoDataStore struct {
 func NewDAO(dbconn *db.MongoConn, db, col string) ports.AttendeeRepository {
 	dbx := dbconn.Client.Database(db)
 	conx := dbx.Collection(col)
-	
+
 	return &MongoDataStore{dbconn, dbx, conx}
 }
 
 type Attendee struct {
-	ID string `bson:"_id,omitempty"`
-	Name string `bson:"name"`
+	ID          string `bson:"_id,omitempty"`
+	Name        string `bson:"name"`
 	CompanyName string `bson:"companyName"`
-	Industry string `bson:"industry"`
+	Industry    string `bson:"industry"`
 }
 
 func NewAttendee(id, name, company, industry string) Attendee {
 	return Attendee{
-		ID: id,
-		Name: name,
+		ID:          id,
+		Name:        name,
 		CompanyName: company,
-		Industry: industry,
+		Industry:    industry,
 	}
 }
 
@@ -49,15 +49,24 @@ func convertMongoAttendeeToDomain(attendee Attendee) domain.Attendee {
 	return domain.NewAttendee(attendee.ID, attendee.Name, attendee.CompanyName, attendee.Industry)
 }
 
-func (m *MongoDataStore) Save(attendee domain.Attendee) (ports.ID, error) {
+func (m *MongoDataStore) Save(attendee domain.Attendee, eventID string) (ports.ID, error) {
 	a := convertDomainAttendeeToMongo(attendee)
-
-	res, err := m.col.InsertOne(context.TODO(), a)
+	objID, err := primitive.ObjectIDFromHex(eventID)
 	if err != nil {
 		return "", err
 	}
 
-	objID := res.InsertedID.(primitive.ObjectID)
+	//res, err := m.col.InsertOne(context.TODO(), a)
+	result, err := m.col.UpdateByID(context.TODO(), objID, bson.M{"$addToSet": bson.M{"attendees": a}})
+	if err != nil {
+		return "", err
+	}
+
+	if result.ModifiedCount == 0 {
+		return "", fmt.Errorf("record was not updated")
+	}
+
+	//objID := res.InsertedID.(primitive.ObjectID)
 
 	return ports.ID(objID.Hex()), nil
 }

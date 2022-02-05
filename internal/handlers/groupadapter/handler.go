@@ -17,25 +17,24 @@ func NewHTTPHandler(groupService ports.GroupService) *HTTPHandler {
 	return &HTTPHandler{groupService: groupService}
 }
 
-// handler will decode body into json group, 
+// handler will decode body into json group,
 // call group service which creates a domain group
 // then call group repository to convert to dao object and persist
 // which returns an id and error to the group service
 // that id is added to the domain group object in the service
 // that domain group is then returned to this function
-// the domain group id is added to the json group object and response 
+// the domain group id is added to the json group object and response
 // is sent back to the called with the completed group
 func (h *HTTPHandler) HandleCreateGroup() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		
 		var group Group
 		err := json.NewDecoder(r.Body).Decode(&group)
 		if err != nil {
 			fmt.Println("error unable to decode body: ", err)
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
-		
+
 			return
 		}
 
@@ -57,7 +56,7 @@ func (h *HTTPHandler) HandleCreateGroup() http.HandlerFunc {
 		}
 		w.WriteHeader(http.StatusCreated)
 		w.Write(b)
-		
+
 	}
 }
 
@@ -84,10 +83,37 @@ func (h *HTTPHandler) HandleGetGroup() http.HandlerFunc {
 
 		b, err := json.Marshal(groupResponse)
 		if err != nil {
-			return 
+			return
 		}
 
 		w.WriteHeader(http.StatusOK)
+		w.Write(b)
+	}
+}
+
+func (h *HTTPHandler) HandleGetAllGroups() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		groups, err := h.groupService.GetAllGroups()
+		if err != nil {
+			fmt.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		var jsonGroups []Group
+		for _, group := range groups {
+			jsonGroups = append(jsonGroups, ConvertJSONGroupFromDomain(group))
+		}
+
+		b, err := json.Marshal(jsonGroups)
+		if err != nil {
+			fmt.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
 		w.Write(b)
 	}
 }

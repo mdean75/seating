@@ -27,7 +27,6 @@ func NewRouterWithCors(controller *app.Controller, conf config.Configuration) ht
 	r := mux.NewRouter()
 
 	addRoutes(r, controller)
-	
 
 	crs := cors.New(opts)
 	return crs.Handler(r)
@@ -37,7 +36,7 @@ func addRoutes(r *mux.Router, controller *app.Controller) {
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("ok"))
 	})
-	
+
 	var a api.AppData
 	a.Industries = api.SetIndustries()
 
@@ -52,13 +51,14 @@ func addRoutes(r *mux.Router, controller *app.Controller) {
 
 	r.HandleFunc("/group", controller.GroupHandler.HandleCreateGroup()).Methods(http.MethodPost)
 	r.HandleFunc("/group/{id}", controller.GroupHandler.HandleGetGroup()).Methods(http.MethodGet)
+	r.HandleFunc("/group", controller.GroupHandler.HandleGetAllGroups()).Methods(http.MethodGet)
 	r.HandleFunc("/group/{id}", controller.GroupHandler.HandleDeleteGroup()).Methods(http.MethodDelete)
 
 	r.HandleFunc("/event", controller.EventHandler.HandleCreateEvent()).Methods(http.MethodPost)
 	r.HandleFunc("/event/{id}", controller.EventHandler.HandleGetEvent()).Methods(http.MethodGet)
 	r.HandleFunc("/event/{id}", controller.EventHandler.HandleDeleteEvent()).Methods(http.MethodDelete)
 
-	r.HandleFunc("/attendee", controller.AttendeeHandler.HandleCreateAttendee()).Methods(http.MethodPost)
+	r.HandleFunc("/event/{eventId}/attendee", controller.AttendeeHandler.HandleCreateAttendee()).Methods(http.MethodPost)
 	r.HandleFunc("/attendee/{id}", controller.AttendeeHandler.HandleGet()).Methods(http.MethodGet)
 	r.HandleFunc("/attendee/{id}", controller.AttendeeHandler.HandleDelete()).Methods(http.MethodDelete)
 
@@ -66,4 +66,3 @@ func addRoutes(r *mux.Router, controller *app.Controller) {
 	r.HandleFunc("/industry/{id}", controller.Industryhandler.HandleGet()).Methods(http.MethodGet)
 	r.HandleFunc("/industry/{id}", controller.Industryhandler.HandleDelete()).Methods(http.MethodDelete)
 }
-

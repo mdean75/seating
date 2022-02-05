@@ -16,3 +16,4 @@ docker-build:
 compose:
 	docker-compose build
 	docker-compose up
+	docker image prune -f

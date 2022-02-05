@@ -11,6 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
+
 type MongoDataStore struct {
 	*db.MongoConn
 	db  *mongo.Database
@@ -25,20 +26,20 @@ func NewDAO(dbconn *db.MongoConn, db, col string) ports.GroupRepository {
 }
 
 type Group struct {
-	ID string `bson:"_id,omitempty"`
+	ID          string `bson:"_id,omitempty"`
 	DisplayName string `bson:"displayName"`
-	ShortName string `bson:"shortName"`
+	ShortName   string `bson:"shortName"`
 }
 
 func NewMongoGroupFromDomain(group domain.Group) Group {
 	return Group{
-		ID: group.ID,
+		ID:          group.ID,
 		DisplayName: group.DisplayName,
-		ShortName: group.ShortName,
+		ShortName:   group.ShortName,
 	}
 }
 
-func convertMongoGroupToDomain(group Group) domain.Group {
+func ConvertMongoGroupToDomain(group Group) domain.Group {
 	return domain.NewGroup(group.ID, group.DisplayName, group.ShortName)
 }
 
@@ -62,7 +63,7 @@ func (m *MongoDataStore) Get(groupID string) (domain.Group, error) {
 		return domain.Group{}, err
 	}
 
-	result := m.col.FindOne(context.TODO(), bson.M{"_id": id})//.Decode(&group)
+	result := m.col.FindOne(context.TODO(), bson.M{"_id": id}) //.Decode(&group)
 	if result.Err() != nil {
 		return domain.Group{}, result.Err()
 	}
@@ -71,9 +72,29 @@ func (m *MongoDataStore) Get(groupID string) (domain.Group, error) {
 		return domain.Group{}, err
 	}
 
-	return convertMongoGroupToDomain(group), nil
+	return ConvertMongoGroupToDomain(group), nil
 }
 
+func (m *MongoDataStore) GetAll() ([]domain.Group, error) {
+	var groups []Group
+
+	cur, err := m.col.Find(context.TODO(), bson.M{})
+	if err != nil {
+		return nil, err
+	}
+
+	err = cur.All(context.TODO(), &groups)
+	if err != nil {
+		return nil, err
+	}
+
+	var domainGroups []domain.Group
+	for _, group := range groups {
+		domainGroups = append(domainGroups, ConvertMongoGroupToDomain(group))
+	}
+
+	return domainGroups, nil
+}
 
 var ErrUnableToDeleteResouce error = fmt.Errorf("unable to delete the specified resource")
 

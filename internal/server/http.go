@@ -27,9 +27,8 @@ import (
 	"time"
 )
 
-func NewHTTP(controller *app.Controller, conf config.Configuration) *http.Server{
+func NewHTTP(controller *app.Controller, conf config.Configuration) *http.Server {
 	crs := NewRouterWithCors(controller, conf)
-
 
 	s := http.Server{
 		Addr:         "0.0.0.0:3000",
@@ -46,7 +45,7 @@ func Run() {
 	kill := make(chan struct{}, 1)
 
 	conf := config.EnvVar{}.LoadConfig()
-	
+
 	mongoConn, err := db.NewMongoDatabase(conf.DBConn())
 	if err != nil {
 		fmt.Println("unable to connect to mongo: ", err)
@@ -55,7 +54,7 @@ func Run() {
 
 	groupRepo := grouprepo.NewDAO(mongoConn, "testdb", "group")
 	eventrepo := eventrepo.NewDAO(mongoConn, "testdb", "event")
-	attendeeRepo := attendeerepo.NewDAO(mongoConn, "testdb", "attendee")
+	attendeeRepo := attendeerepo.NewDAO(mongoConn, "testdb", "event")
 	industryRepo := industryrepo.NewDAO(mongoConn, "testdb", "industry")
 
 	groupService := groupservice.New(groupRepo)

@@ -9,13 +9,13 @@ type service struct {
 	attendeeRepository ports.AttendeeRepository
 }
 
-func New(attendeeRepo ports.AttendeeRepository)*service {
+func New(attendeeRepo ports.AttendeeRepository) *service {
 	return &service{attendeeRepository: attendeeRepo}
 }
 
-func (s *service) CreateAttendee(name, companyName, industry string) (domain.Attendee, error) {
+func (s *service) CreateAttendee(name, companyName, industry, eventID string) (domain.Attendee, error) {
 	attendee := domain.NewAttendee("", name, companyName, industry)
-	id, err := s.attendeeRepository.Save(attendee)
+	id, err := s.attendeeRepository.Save(attendee, eventID)
 	if err != nil {
 		return domain.Attendee{}, err
 	}

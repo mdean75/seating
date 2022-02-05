@@ -9,7 +9,7 @@ type service struct {
 	groupRepository ports.GroupRepository
 }
 
-func New(groupRepo ports.GroupRepository)*service {
+func New(groupRepo ports.GroupRepository) *service {
 	return &service{groupRepository: groupRepo}
 }
 
@@ -32,6 +32,10 @@ func (s *service) GetGroup(groupID string) (domain.Group, error) {
 	}
 
 	return group, nil
+}
+
+func (s *service) GetAllGroups() ([]domain.Group, error) {
+	return s.groupRepository.GetAll()
 }
 
 func (s *service) DeleteGroup(groupID string) error {

@@ -1,17 +1,26 @@
 package domain
 
-import "time"
+import (
+	"reflect"
+	"time"
+)
 
 type Event struct {
-	ID string
-	Date time.Time
+	ID      string
+	Date    time.Time
 	GroupID string
+	Group   Group
 }
 
-func NewEvent(id, groupID string, date time.Time) Event {
+func NewEvent(id, groupID string, date time.Time, group Group) Event {
 	return Event{
-		ID: id,
-		Date: date,
+		ID:      id,
+		Date:    date,
 		GroupID: groupID,
+		Group:   group,
 	}
+}
+
+func (e Event) IsZero() bool {
+	return reflect.DeepEqual(e, Event{})
 }

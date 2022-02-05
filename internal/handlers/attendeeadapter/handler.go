@@ -19,6 +19,9 @@ func NewHTTPHandler(attendeeService ports.AttendeeService) *HTTPHandler {
 
 func (h *HTTPHandler) HandleCreateAttendee() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		id := vars["eventId"]
+
 		var attendee Attendee
 
 		err := json.NewDecoder(r.Body).Decode(&attendee)
@@ -26,11 +29,11 @@ func (h *HTTPHandler) HandleCreateAttendee() http.HandlerFunc {
 			fmt.Println("error unable to decode body: ", err)
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
-	
+
 			return
 		}
 
-		domainAttendee, err := h.attendeeservice.CreateAttendee(attendee.Name, attendee.CompanyName, attendee.Industry)
+		domainAttendee, err := h.attendeeservice.CreateAttendee(attendee.Name, attendee.CompanyName, attendee.Industry, id)
 		if err != nil {
 			fmt.Println(err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -43,7 +46,7 @@ func (h *HTTPHandler) HandleCreateAttendee() http.HandlerFunc {
 
 		b, err := json.Marshal(attendee)
 		if err != nil {
-			return 
+			return
 		}
 
 		w.WriteHeader(http.StatusCreated)
@@ -74,7 +77,7 @@ func (h *HTTPHandler) HandleGet() http.HandlerFunc {
 
 		b, err := json.Marshal(eventResponse)
 		if err != nil {
-			return 
+			return
 		}
 
 		w.WriteHeader(http.StatusOK)

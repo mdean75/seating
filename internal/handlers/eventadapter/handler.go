@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"seating/internal/app/ports"
+	"seating/internal/handlers/groupadapter"
 
 	"github.com/gorilla/mux"
 )
@@ -26,11 +27,11 @@ func (h *HTTPHandler) HandleCreateEvent() http.HandlerFunc {
 			fmt.Println("error unable to decode body: ", err)
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
-	
+
 			return
 		}
 
-		domainEvent, err := h.eventService.CreateEvent(event.GroupID)
+		domainEvent, err := h.eventService.CreateEvent(event.GroupID, groupadapter.ConvertDomainGroupFromJSON(event.Group))
 		if err != nil {
 			fmt.Println(err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -44,7 +45,7 @@ func (h *HTTPHandler) HandleCreateEvent() http.HandlerFunc {
 
 		b, err := json.Marshal(event)
 		if err != nil {
-			return 
+			return
 		}
 
 		w.WriteHeader(http.StatusCreated)
@@ -75,7 +76,7 @@ func (h *HTTPHandler) HandleGetEvent() http.HandlerFunc {
 
 		b, err := json.Marshal(eventResponse)
 		if err != nil {
-			return 
+			return
 		}
 
 		w.WriteHeader(http.StatusOK)

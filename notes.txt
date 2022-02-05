@@ -29,3 +29,27 @@ actors
       ex. db
 
 adapters "plug" into ports
+
+
+------------------
+ADD AN ENDPOINT for an existing resource
+
+- add to internal/app/ports/repositories.go interface
+- add to internal/app/ports/services.go interface
+- add service method to internal/app/services/service/service.go
+- add internal/repositories/repository/mongoDAO.go
+- add handler internal/handlers/adapter/handler.go
+- add route
+
+
+ADD A NEW resource
+- add new folder under internal/app/domain
+- create a repository interface in internal/app/ports/repositories.go
+- create a service interface in internal/app/ports/services.go
+- create a new folder under internal/app/services and add a service.go file and implement service interface
+- create an adapter folder under internal/handlers and create a dto and handler
+  - dto will have the json struct
+  - handler will implement the handler function
+- create a folder under internal/repositories and add dao 
+- wire new resource in internal/server/http.go
+- add routes to internal/server/router.go
