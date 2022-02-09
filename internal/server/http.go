@@ -53,12 +53,12 @@ func Run() {
 	}
 
 	groupRepo := grouprepo.NewDAO(mongoConn, "testdb", "group")
-	eventrepo := eventrepo.NewDAO(mongoConn, "testdb", "event")
+	eventRepo := eventrepo.NewDAO(mongoConn, "testdb", "event")
 	attendeeRepo := attendeerepo.NewDAO(mongoConn, "testdb", "event")
 	industryRepo := industryrepo.NewDAO(mongoConn, "testdb", "industry")
 
 	groupService := groupservice.New(groupRepo)
-	eventService := eventservice.New(eventrepo)
+	eventService := eventservice.New(eventRepo)
 	attendeeService := attendeeservice.New(attendeeRepo)
 	industryService := industryservice.New(industryRepo)
 

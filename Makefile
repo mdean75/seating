@@ -13,7 +13,15 @@ clean:
 docker-build:
 	docker build . -t seating:latest -f Dockerfile
 
+compose-up:
+	docker-compose -f docker-compose-local.yaml up
+
 compose:
 	docker-compose build
 	docker-compose up
 	docker image prune -f
+
+docker-clean:
+	#docker rm  $(docker ps -a -s | grep -v "mongo" | awk '{print $1}' | grep -v CONTAINER)
+	docker image prune -f
+

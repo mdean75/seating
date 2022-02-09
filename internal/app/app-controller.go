@@ -8,16 +8,16 @@ import (
 )
 
 type Controller struct {
-	GroupHandler *groupadapter.HTTPHandler
-	EventHandler *eventadapter.HTTPHandler
+	GroupHandler    *groupadapter.HTTPHandler
+	EventHandler    *eventadapter.HTTPHandler
 	AttendeeHandler *attendeeadapter.HTTPHandler
 	Industryhandler *industryadapter.HTTPHandler
 }
 
 func NewController(group *groupadapter.HTTPHandler, event *eventadapter.HTTPHandler, attendee *attendeeadapter.HTTPHandler, industry *industryadapter.HTTPHandler) *Controller {
 	return &Controller{
-		GroupHandler: group,
-		EventHandler: event,
+		GroupHandler:    group,
+		EventHandler:    event,
 		AttendeeHandler: attendee,
 		Industryhandler: industry,
 	}

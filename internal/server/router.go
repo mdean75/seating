@@ -54,11 +54,17 @@ func addRoutes(r *mux.Router, controller *app.Controller) {
 	r.HandleFunc("/group", controller.GroupHandler.HandleGetAllGroups()).Methods(http.MethodGet)
 	r.HandleFunc("/group/{id}", controller.GroupHandler.HandleDeleteGroup()).Methods(http.MethodDelete)
 
-	r.HandleFunc("/event", controller.EventHandler.HandleCreateEvent()).Methods(http.MethodPost)
+	r.HandleFunc("/event", HandlePreFlight(
+		controller.EventHandler.HandleCreateEvent(
+			logRequest()))).Methods(http.MethodPost, http.MethodOptions)
 	r.HandleFunc("/event/{id}", controller.EventHandler.HandleGetEvent()).Methods(http.MethodGet)
 	r.HandleFunc("/event/{id}", controller.EventHandler.HandleDeleteEvent()).Methods(http.MethodDelete)
+	r.HandleFunc("/event/{id}/pairing", controller.EventHandler.HandleCreatingPairingRound()).Methods(http.MethodPost)
 
-	r.HandleFunc("/event/{eventId}/attendee", controller.AttendeeHandler.HandleCreateAttendee()).Methods(http.MethodPost)
+	r.HandleFunc("/event/{eventId}/attendee", HandlePreFlight(
+		controller.AttendeeHandler.HandleCreateAttendee(
+			logRequest()))).Methods(http.MethodPost, http.MethodOptions)
+	r.HandleFunc("/event/{eventId}/demo", controller.AttendeeHandler.HandleInitDemo()).Methods(http.MethodPost)
 	r.HandleFunc("/attendee/{id}", controller.AttendeeHandler.HandleGet()).Methods(http.MethodGet)
 	r.HandleFunc("/attendee/{id}", controller.AttendeeHandler.HandleDelete()).Methods(http.MethodDelete)
 

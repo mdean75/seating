@@ -1,13 +1,13 @@
 package domain
 
 type Industry struct {
-	ID string
+	ID   string
 	Name string
 }
 
 func NewIndustry(id, name string) Industry {
 	return Industry{
-		ID: id,
+		ID:   id,
 		Name: name,
 	}
 }

@@ -15,6 +15,11 @@ type EventRepository interface {
 	Save(domain.Event) (ID, error)
 	Get(string) (domain.Event, error)
 	Delete(string) error
+	PairingRepository
+}
+
+type PairingRepository interface {
+	SaveRound(string, []domain.Pair) error
 }
 
 type AttendeeRepository interface {

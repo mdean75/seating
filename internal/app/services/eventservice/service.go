@@ -39,3 +39,7 @@ func (s *service) GetEvent(eventID string) (domain.Event, error) {
 func (s *service) DeleteEvent(eventID string) error {
 	return s.eventRepository.Delete(eventID)
 }
+
+func (s *service) CreatePairingRound(eventID string, pairs []domain.Pair) error {
+	return s.eventRepository.SaveRound(eventID, pairs)
+}

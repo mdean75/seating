@@ -18,8 +18,8 @@ func NewConfiguration(m MongoConfig, debugCors bool) Configuration {
 }
 
 type MongoConfig struct {
-	dbConn string
-	dbName string
+	dbConn          string
+	dbName          string
 	groupCollection string
 	eventCollection string
 }

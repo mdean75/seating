@@ -13,6 +13,7 @@ type EventService interface {
 	CreateEvent(groupID string, group domain.Group) (domain.Event, error)
 	GetEvent(eventID string) (domain.Event, error)
 	DeleteEvent(eventID string) error
+	CreatePairingRound(eventID string, attendees []domain.Pair) error
 }
 
 type AttendeeService interface {

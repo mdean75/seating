@@ -17,7 +17,29 @@ func NewHTTPHandler(attendeeService ports.AttendeeService) *HTTPHandler {
 	return &HTTPHandler{attendeeservice: attendeeService}
 }
 
-func (h *HTTPHandler) HandleCreateAttendee() http.HandlerFunc {
+//var demoAttendees []domain.Attendee
+
+func (h *HTTPHandler) HandleInitDemo() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		id := vars["eventId"]
+
+		for _, attendee := range demoAttendees {
+			_, err := h.attendeeservice.CreateAttendee(attendee.Name, attendee.CompanyName, attendee.Industry, id)
+			if err != nil {
+				fmt.Println(err)
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte(err.Error()))
+
+				return
+			}
+		}
+
+		w.WriteHeader(http.StatusCreated)
+		w.Write([]byte("demo attendees added"))
+	}
+}
+func (h *HTTPHandler) HandleCreateAttendee(next http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id := vars["eventId"]
@@ -42,15 +64,18 @@ func (h *HTTPHandler) HandleCreateAttendee() http.HandlerFunc {
 			return
 		}
 
-		attendee.ID = domainAttendee.ID
+		attendee.ID = domainAttendee.ID // TODO: kinda questioning this?
 
 		b, err := json.Marshal(attendee)
 		if err != nil {
 			return
 		}
 
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 		w.Write(b)
+
+		next.ServeHTTP(w, r)
 	}
 }
 

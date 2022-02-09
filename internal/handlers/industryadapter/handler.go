@@ -26,7 +26,7 @@ func (h *HTTPHandler) HandleCreateIndustry() http.HandlerFunc {
 			fmt.Println("error unable to decode body: ", err)
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
-	
+
 			return
 		}
 
@@ -43,7 +43,7 @@ func (h *HTTPHandler) HandleCreateIndustry() http.HandlerFunc {
 
 		b, err := json.Marshal(industry)
 		if err != nil {
-			return 
+			return
 		}
 
 		w.WriteHeader(http.StatusCreated)
@@ -74,7 +74,7 @@ func (h *HTTPHandler) HandleGet() http.HandlerFunc {
 
 		b, err := json.Marshal(eventResponse)
 		if err != nil {
-			return 
+			return
 		}
 
 		w.WriteHeader(http.StatusOK)

@@ -1,0 +1,54 @@
+{
+  "name": "Event",
+  "_id": "ObjectId()",
+  "date": "2022-02-01",
+  "groupId": "probably don't need",
+  "group": {
+    "groupId": "ObjectId()",
+    "displayName": "",
+    "shortName": ""
+  },
+  "attendees": [
+    {
+      "name": "",
+      "company": "",
+      "industry": ""
+    },
+    {
+      "name": "",
+      "company": "",
+      "industry": ""
+    }
+  ],
+  "rounds": [
+    {
+      "round_id": "could be round number",
+      "pairs": [
+        {
+          "seat1": {
+            "name": "",
+            "company": "",
+            "industry": ""
+          },
+          "seat2": {
+            "name": "",
+            "company": "",
+            "industry": ""
+          }
+        },
+        {
+          "seat1": {
+            "name": "",
+            "company": "",
+            "industry": ""
+          },
+          "seat2": {
+            "name": "",
+            "company": "",
+            "industry": ""
+          }
+        }
+      ]
+    }
+  ]
+}

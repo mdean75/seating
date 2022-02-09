@@ -9,7 +9,7 @@ type service struct {
 	industryRepository ports.IndustryRepository
 }
 
-func New(industryRepo ports.IndustryRepository)*service {
+func New(industryRepo ports.IndustryRepository) *service {
 	return &service{industryRepository: industryRepo}
 }
 

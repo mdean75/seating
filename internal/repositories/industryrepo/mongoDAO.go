@@ -21,18 +21,18 @@ type MongoDataStore struct {
 func NewDAO(dbconn *db.MongoConn, db, col string) ports.IndustryRepository {
 	dbx := dbconn.Client.Database(db)
 	conx := dbx.Collection(col)
-	
+
 	return &MongoDataStore{dbconn, dbx, conx}
 }
 
 type Industry struct {
-	ID string `bson:"_id,omitempty"`
+	ID   string `bson:"_id,omitempty"`
 	Name string `bson:"name"`
 }
 
 func NewIndustry(id, name string) Industry {
 	return Industry{
-		ID: id,
+		ID:   id,
 		Name: name,
 	}
 }

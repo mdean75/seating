@@ -26,10 +26,11 @@ func NewDAO(dbconn *db.MongoConn, db, col string) ports.AttendeeRepository {
 }
 
 type Attendee struct {
-	ID          string `bson:"_id,omitempty"`
-	Name        string `bson:"name"`
-	CompanyName string `bson:"companyName"`
-	Industry    string `bson:"industry"`
+	ID          string     `bson:"attendeeId"`
+	Name        string     `bson:"name"`
+	CompanyName string     `bson:"companyName"`
+	Industry    string     `bson:"industry"`
+	PairedWith  []Attendee `bson:"pairedWith"`
 }
 
 func NewAttendee(id, name, company, industry string) Attendee {
@@ -38,6 +39,7 @@ func NewAttendee(id, name, company, industry string) Attendee {
 		Name:        name,
 		CompanyName: company,
 		Industry:    industry,
+		PairedWith:  make([]Attendee, 0),
 	}
 }
 
@@ -50,6 +52,7 @@ func convertMongoAttendeeToDomain(attendee Attendee) domain.Attendee {
 }
 
 func (m *MongoDataStore) Save(attendee domain.Attendee, eventID string) (ports.ID, error) {
+	attendee.ID = primitive.NewObjectID().Hex()
 	a := convertDomainAttendeeToMongo(attendee)
 	objID, err := primitive.ObjectIDFromHex(eventID)
 	if err != nil {

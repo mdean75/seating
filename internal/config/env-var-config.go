@@ -6,8 +6,8 @@ import (
 )
 
 type EnvVar struct {
-	dbConn            string
-	dbName string
+	dbConn          string
+	dbName          string
 	groupCollection string
 	eventCollection string
 }
