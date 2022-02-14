@@ -46,7 +46,6 @@ func Run() {
 
 	conf := config.EnvVar{}.LoadConfig()
 
-	fmt.Println(conf.DBConn())
 	mongoConn, err := db.NewMongoDatabase(conf.DBConn())
 	if err != nil {
 		fmt.Println("unable to connect to mongo: ", err)
