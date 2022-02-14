@@ -1,0 +1,3 @@
+each service type will have a subdir 
+
+The services are our entry points to the core and each one of them implements the corresponding port

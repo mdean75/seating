@@ -1,0 +1,13 @@
+{
+    "name": "Meeting",
+    "_id": "ObjectId()",
+    "meetingId": "",
+    "date": "",
+    "groupId": "",
+    "groupName": "",
+    "attendees": [
+      "",
+      ""
+    ],
+    "pairings": []
+  }

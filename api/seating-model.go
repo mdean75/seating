@@ -1,12 +1,16 @@
 /**
 filename:	seating-model.go
 purpose:	provides models for the application
-update:		3/3/2020
-comments:	all of the models as well as the function to load the industries data have been moved to this file.
+update:		1/28/2022
+comments:	3/3/2020 all of the models as well as the function to load the industries data have been moved to this file.
+			1/28/2022 adding controller with db connection
 */
 
 package api
 
+import "go.mongodb.org/mongo-driver/mongo"
+
+// TODO: I THINK THIS STRUCT AND ANYTHING THAT USES IT CAN GO AWAY
 // data struct for the add attendee template
 type inputData struct {
 	Industries   []string `json:"industries"`
@@ -19,10 +23,11 @@ type inputData struct {
 
 // overall data for the application
 type AppData struct {
-	Industries []string   `json:"industries"`
-	Attendees  []Attendee `json:"attendees"`
-	Pairs      []Pair     `json:"pairs"`
-	ListCount  int        `json:"listCount"`
+	Industries []string      `json:"industries"`
+	Attendees  []Attendee    `json:"attendees"`
+	Pairs      []Pair        `json:"pairs"`
+	ListCount  int           `json:"listCount"`
+	Conn       *mongo.Client `json:"-"`
 }
 
 type Attendee struct {

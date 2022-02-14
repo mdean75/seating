@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "name - this was just for creating the schema itself": {
+      "type": "string"
+    },
+    "_id": {
+      "type": "string"
+    },
+    "meetingId": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string"
+    },
+    "groupId": {
+      "type": "string"
+    },
+    "groupName": {
+      "type": "string"
+    },
+    "attendees": {
+      "type": "array",
+      "items": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "pairings": {
+      "type": "array",
+      "items": {}
+    }
+  },
+  "required": [
+    "name",
+    "_id",
+    "meetingId",
+    "date",
+    "groupId",
+    "groupName",
+    "attendees",
+    "pairings"
+  ]
+}
