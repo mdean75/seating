@@ -26,7 +26,6 @@ package group
 // 	// if conf.DBConn() == "" {
 // 	// 	return nil, fmt.Errorf("dbconn is not set")
 // 	// }
-	
 
 // 	conf.MongoConfig.SetDBConn("mongodb://127.0.0.1:27017")
 // 	mongoConn, err := db.NewMongoDatabase(conf.DBConn())

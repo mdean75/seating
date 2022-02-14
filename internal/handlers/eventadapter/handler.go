@@ -20,7 +20,35 @@ func NewHTTPHandler(eventService ports.EventService) *HTTPHandler {
 	return &HTTPHandler{eventService: eventService}
 }
 
-func (h *HTTPHandler) HandleCreatingPairingRound() http.HandlerFunc {
+func (h *HTTPHandler) HandleGetPairingCount(next http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		vars := mux.Vars(r)
+		id := vars["id"]
+
+		count, err := h.eventService.GetListCount(id)
+		if err != nil {
+			fmt.Println("error unable to get list count from db: ", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		resp := make(map[string]interface{})
+		resp["listCount"] = count
+
+		json.NewEncoder(w).Encode(resp)
+
+		next.ServeHTTP(w, r)
+	}
+}
+
+// TODO: FIRST FETCH ALL ATTENDEES FROM DB, THIS IS SHORT TERM FIX TO MATCH ORIGINAL IMPLEMENTATION
+func (h *HTTPHandler) HandleCreatingPairingRound(next http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id := vars["id"]
@@ -36,6 +64,16 @@ func (h *HTTPHandler) HandleCreatingPairingRound() http.HandlerFunc {
 			return
 		}
 
+		// TODO: GET ALL THE ATTENDEES FROM THE DB FOR THIS EVENT, THIS WILL BE REMOVED IN THE FUTURE
+		ev, err := h.eventService.GetEvent(id)
+		if err != nil {
+			fmt.Println("error unable to get event from db: ", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+
+			return
+		}
+
 		// convert the json attendee list to a domain array
 		//var domainAttendees []domain.Attendee
 		//for _, a := range attendees {
@@ -44,8 +82,12 @@ func (h *HTTPHandler) HandleCreatingPairingRound() http.HandlerFunc {
 
 		// convert the json attendde list to a domain attendee map
 		domAttendees := make(map[string]domain.Attendee)
-		for _, a := range attendees {
-			domAttendees[a.ID] = domain.NewAttendee(a.ID, a.Name, a.CompanyName, a.Industry)
+		//for _, a := range attendees {
+		//	domAttendees[a.ID] = domain.NewAttendee(a.ID, a.Name, a.CompanyName, a.Industry)
+		//}
+
+		for _, a := range ev.Attendees {
+			domAttendees[a.ID] = a
 		}
 
 		// get the event data which has all the attendees and their previous pairs
@@ -132,8 +174,9 @@ func (h *HTTPHandler) HandleCreatingPairingRound() http.HandlerFunc {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-
 		w.Write(b)
+
+		next.ServeHTTP(w, r)
 	}
 }
 func (h *HTTPHandler) HandleCreateEvent(next http.Handler) http.HandlerFunc {
@@ -149,10 +192,10 @@ func (h *HTTPHandler) HandleCreateEvent(next http.Handler) http.HandlerFunc {
 
 			//return
 			next.ServeHTTP(w, r)
-
+			return
 		}
 
-		domainEvent, err := h.eventService.CreateEvent(event.GroupID, groupadapter.ConvertDomainGroupFromJSON(event.Group))
+		domainEvent, err := h.eventService.CreateEvent(event.GroupID, groupadapter.ConvertDomainGroupFromJSON(event.Group), event.Date)
 		if err != nil {
 			fmt.Println(err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -160,6 +203,7 @@ func (h *HTTPHandler) HandleCreateEvent(next http.Handler) http.HandlerFunc {
 
 			//return
 			next.ServeHTTP(w, r)
+			return
 		}
 
 		event.ID = domainEvent.ID
@@ -178,7 +222,7 @@ func (h *HTTPHandler) HandleCreateEvent(next http.Handler) http.HandlerFunc {
 	}
 }
 
-func (h *HTTPHandler) HandleGetEvent() http.HandlerFunc {
+func (h *HTTPHandler) HandleGetEvent(next http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id := vars["id"]
@@ -204,8 +248,11 @@ func (h *HTTPHandler) HandleGetEvent() http.HandlerFunc {
 			return
 		}
 
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write(b)
+
+		next.ServeHTTP(w, r)
 	}
 }
 
@@ -229,5 +276,47 @@ func (h *HTTPHandler) HandleDeleteEvent() http.HandlerFunc {
 		}
 
 		w.Write([]byte("resource deleted"))
+	}
+}
+
+func (h *HTTPHandler) HandleGetGroupsEvents(next http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		id := vars["id"]
+
+		w.Header().Set("Content-Type", "application/json")
+		if id == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			resp := map[string]string{"error": "Cannot get events for group, missing group id"}
+			json.NewEncoder(w).Encode(resp)
+
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		events, err := h.eventService.GetEventsForGroup(id)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			resp := map[string]string{"errorMsg": "Cannot get events for group", "err": err.Error()}
+			json.NewEncoder(w).Encode(resp)
+
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		var jsonEvents []Event
+		for _, domEvent := range events {
+			jsonEvents = append(jsonEvents, Event{
+				ID:   domEvent.ID,
+				Date: domEvent.Date,
+			})
+		}
+
+		w.WriteHeader(http.StatusOK)
+		resp := map[string]interface{}{"events": jsonEvents}
+
+		json.NewEncoder(w).Encode(resp)
+
+		next.ServeHTTP(w, r)
 	}
 }

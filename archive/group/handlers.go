@@ -1,13 +1,13 @@
 package group
 
 import (
-	// "encoding/json"
-	// "fmt"
-	// "net/http"
-	// "seating/internal/app/domain"
-	// "seating/internal/app/ports"
-	// "seating/internal/app"
-	// "seating/internal/app/group"
+// "encoding/json"
+// "fmt"
+// "net/http"
+// "seating/internal/app/domain"
+// "seating/internal/app/ports"
+// "seating/internal/app"
+// "seating/internal/app/group"
 )
 
 // type Group struct {
@@ -25,7 +25,7 @@ import (
 // 			fmt.Println("error unable to decode body: ", err)
 // 			w.WriteHeader(http.StatusBadRequest)
 // 			w.Write([]byte(err.Error()))
-		
+
 // 			return
 // 		}
 
@@ -40,7 +40,7 @@ import (
 
 // 		w.WriteHeader(http.StatusCreated)
 // 		w.Write([]byte(id))
-		
+
 // 	}
 // }
 
@@ -53,12 +53,12 @@ import (
 // 			fmt.Println("error unable to decode body: ", err)
 // 			w.WriteHeader(http.StatusBadRequest)
 // 			w.Write([]byte(err.Error()))
-		
+
 // 			return
 // 		}
 
 // 		id, err := c.Datastore.CreateEvent(ports.ID(event.GroupID))
-		
+
 // 		if err != nil {
 // 			fmt.Println(err)
 // 			w.WriteHeader(http.StatusBadRequest)

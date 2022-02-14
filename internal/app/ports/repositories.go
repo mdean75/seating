@@ -15,6 +15,8 @@ type EventRepository interface {
 	Save(domain.Event) (ID, error)
 	Get(string) (domain.Event, error)
 	Delete(string) error
+	GetListCount(string) (int, error)
+	GetEventsForGroup(string) ([]domain.Event, error)
 	PairingRepository
 }
 

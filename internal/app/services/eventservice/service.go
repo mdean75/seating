@@ -14,9 +14,14 @@ func New(eventRepo ports.EventRepository) *service {
 	return &service{eventRepository: eventRepo}
 }
 
-func (s *service) CreateEvent(groupID string, group domain.Group) (domain.Event, error) {
+func (s *service) GetListCount(eventID string) (int, error) {
+	return s.eventRepository.GetListCount(eventID)
+
+}
+
+func (s *service) CreateEvent(groupID string, group domain.Group, date time.Time) (domain.Event, error) {
 	// TODO: We will want this to be not the current time but rather the date of the event
-	event := domain.NewEvent("", groupID, time.Now(), group)
+	event := domain.NewEvent("", groupID, date, group)
 	id, err := s.eventRepository.Save(event)
 	if err != nil {
 		return domain.Event{}, err
@@ -42,4 +47,8 @@ func (s *service) DeleteEvent(eventID string) error {
 
 func (s *service) CreatePairingRound(eventID string, pairs []domain.Pair) error {
 	return s.eventRepository.SaveRound(eventID, pairs)
+}
+
+func (s *service) GetEventsForGroup(groupID string) ([]domain.Event, error) {
+	return s.eventRepository.GetEventsForGroup(groupID)
 }

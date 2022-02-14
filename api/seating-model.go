@@ -23,11 +23,11 @@ type inputData struct {
 
 // overall data for the application
 type AppData struct {
-	Industries []string   `json:"industries"`
-	Attendees  []Attendee `json:"attendees"`
-	Pairs      []Pair     `json:"pairs"`
-	ListCount  int        `json:"listCount"`
-	Conn *mongo.Client `json:"-"`
+	Industries []string      `json:"industries"`
+	Attendees  []Attendee    `json:"attendees"`
+	Pairs      []Pair        `json:"pairs"`
+	ListCount  int           `json:"listCount"`
+	Conn       *mongo.Client `json:"-"`
 }
 
 type Attendee struct {

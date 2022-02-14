@@ -3,6 +3,7 @@ package eventrepo
 import (
 	"context"
 	"fmt"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"seating/internal/app/domain"
 	"seating/internal/app/ports"
 	"seating/internal/db"
@@ -53,6 +54,7 @@ func NewMongoEventFromDomain(domainEvent domain.Event) Event {
 		GroupID: domainEvent.GroupID,
 		Group:   grouprepo.NewMongoGroupFromDomain(domainEvent.Group),
 		//Attendees: domainEvent.Attendees,
+		PairingRounds: make([][]Pair, 0),
 	}
 }
 
@@ -73,16 +75,25 @@ func convertMongoEventToDomain(event Event) domain.Event {
 				//PairedWithName: nil,
 			})
 
-			domainAttendees = append(domainAttendees, domain.Attendee{
-				ID:          attendee.ID,
-				Name:        attendee.Name,
-				CompanyName: attendee.CompanyName,
-				Industry:    attendee.Industry,
-				PairedWith:  pairedWithAttendees,
-				//PairedWithID:   nil,
-				//PairedWithName: nil,
-			})
+			//domainAttendees = append(domainAttendees, domain.Attendee{
+			//	ID:          attendee.ID,
+			//	Name:        attendee.Name,
+			//	CompanyName: attendee.CompanyName,
+			//	Industry:    attendee.Industry,
+			//	PairedWith:  pairedWithAttendees,
+			//	//PairedWithID:   nil,
+			//	//PairedWithName: nil,
+			//})
 		}
+		domainAttendees = append(domainAttendees, domain.Attendee{
+			ID:          attendee.ID,
+			Name:        attendee.Name,
+			CompanyName: attendee.CompanyName,
+			Industry:    attendee.Industry,
+			PairedWith:  pairedWithAttendees,
+			//PairedWithID:   nil,
+			//PairedWithName: nil,
+		})
 		//domainAttendees = append(domainAttendees, domain.)
 	}
 
@@ -140,9 +151,13 @@ func convertMongoEventToDomain(event Event) domain.Event {
 func (m *MongoDataStore) Save(event domain.Event) (ports.ID, error) {
 
 	e := NewMongoEventFromDomain(event)
+
 	if e.Attendees == nil {
 		e.Attendees = make([]attendeerepo.Attendee, 0)
 	}
+	//if e.Attendees == nil {
+	//	e.Attendees = make()
+	//}
 
 	res, err := m.col.InsertOne(context.TODO(), e)
 	if err != nil {
@@ -188,6 +203,33 @@ func (m *MongoDataStore) Delete(eventID string) error {
 	}
 
 	return nil
+}
+
+func (m *MongoDataStore) GetListCount(eventID string) (int, error) {
+	id, err := primitive.ObjectIDFromHex(eventID)
+	if err != nil {
+		return 0, err
+	}
+
+	match := bson.M{"_id": id}
+	project := bson.M{"pairingRounds": 1}
+
+	opts := options.FindOneOptions{
+		Projection: project,
+	}
+
+	data := struct {
+		PairingRounds []interface{}
+	}{}
+
+	//var rounds []interface{}
+
+	err = m.col.FindOne(context.TODO(), match, &opts).Decode(&data)
+	if err != nil {
+		return 0, err
+	}
+
+	return len(data.PairingRounds), nil
 }
 
 func (m *MongoDataStore) SaveRound(eventID string, pairs []domain.Pair) error {
@@ -258,4 +300,38 @@ func (m *MongoDataStore) SaveRound(eventID string, pairs []domain.Pair) error {
 	}
 
 	return nil
+}
+
+func (m *MongoDataStore) GetEventsForGroup(groupID string) ([]domain.Event, error) {
+	var events []domain.Event
+
+	//id, err := primitive.ObjectIDFromHex(groupID)
+	//if err != nil {
+	//	return nil, err
+	//}
+
+	match := bson.M{"groupId": groupID}
+	project := bson.M{"_id": 1, "date": 1}
+	opts := options.FindOptions{Projection: project, Sort: bson.M{"date": 1}}
+
+	var mongoEvents []Event
+
+	cur, err := m.col.Find(context.TODO(), match, &opts)
+	if err != nil {
+		return nil, err
+	}
+
+	err = cur.All(context.TODO(), &mongoEvents)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, ev := range mongoEvents {
+		events = append(events, domain.Event{
+			ID:   ev.ID,
+			Date: ev.Date,
+		})
+	}
+
+	return events, nil
 }

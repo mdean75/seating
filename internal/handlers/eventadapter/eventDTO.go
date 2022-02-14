@@ -12,10 +12,10 @@ type ID string
 type Event struct {
 	ID           string                     `json:"id,omitempty"`
 	Date         time.Time                  `json:"date"`
-	GroupID      string                     `json:"groupId"`
-	Group        groupadapter.Group         `json:"group"`
-	Attendees    []attendeeadapter.Attendee `json:"attendees"`
-	PairingRound [][]Pair                   `json:"pairingRound"`
+	GroupID      string                     `json:"groupId,omitempty"`
+	Group        groupadapter.Group         `json:"group,omitempty"`
+	Attendees    []attendeeadapter.Attendee `json:"attendees,omitempty"`
+	PairingRound [][]Pair                   `json:"pairingRound,omitempty"`
 }
 
 // func NewEventRequest(groupID ID) Event {

@@ -1,4 +1,4 @@
-[dep-check:
+dep-check:
 	go list -u -m all
 
 run:
@@ -13,7 +13,7 @@ clean:
 docker-build:
 	docker build . -t seating:latest -f Dockerfile
 
-compose-up:
+start-mongo:
 	docker-compose -f docker-compose-local.yaml up
 
 compose:

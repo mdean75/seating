@@ -16,11 +16,12 @@ type Event struct {
 
 func NewEvent(id, groupID string, date time.Time, group Group, attendees ...Attendee) Event {
 	return Event{
-		ID:        id,
-		Date:      date,
-		GroupID:   groupID,
-		Group:     group,
-		Attendees: attendees,
+		ID:           id,
+		Date:         date,
+		GroupID:      groupID,
+		Group:        group,
+		Attendees:    attendees,
+		PairingRound: make([]PairingRound, 0),
 	}
 }
 

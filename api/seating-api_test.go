@@ -14,19 +14,19 @@ func TestAppData_generateID(t *testing.T) {
 		fields fields
 		want   int
 	}{
-		{name:"test 1", fields:fields{
+		{name: "test 1", fields: fields{
 			Industries: nil,
-			Attendees:  []Attendee{{
+			Attendees: []Attendee{{
 				Name:           "george",
 				ID:             6,
 				Industry:       "",
 				Business:       "",
 				PairedWith:     nil,
 				PairedWithName: nil,
-			},{Name:"larry", ID:6}},
-			Pairs:      nil,
-			ListCount:  0,
-		}, want:1},
+			}, {Name: "larry", ID: 6}},
+			Pairs:     nil,
+			ListCount: 0,
+		}, want: 1},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

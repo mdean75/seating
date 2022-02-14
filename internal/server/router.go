@@ -13,7 +13,7 @@ import (
 
 func NewRouterWithCors(controller *app.Controller, conf config.Configuration) http.Handler {
 	methods := []string{http.MethodPost, http.MethodGet, http.MethodOptions}
-	origins := []string{"http://localhost:4200", "https://letters2lostlovedones.com", "http://127.0.0.1:4200"}
+	origins := []string{"http://localhost:8080", "http://192.168.1.211:8080", "http://localhost:4200", "https://letters2lostlovedones.com", "http://127.0.0.1:4200"}
 	headers := []string{"Content-Type"}
 
 	opts := cors.Options{
@@ -47,24 +47,53 @@ func addRoutes(r *mux.Router, controller *app.Controller) {
 	r.Handle("/api/appdata", a.GetAppData()).Methods(http.MethodGet)
 	r.Handle("/api/count", a.GetListCount()).Methods(http.MethodGet)
 	r.Handle("/api/industry", a.GetIndustries()).Methods(http.MethodGet)
-	r.HandleFunc("/api/demo", a.DemoAPI).Methods(http.MethodGet)
+	r.HandleFunc("/api/demo", a.DemoAPI).Methods(http.MethodGet, http.MethodOptions)
 
+	// group routes
 	r.HandleFunc("/group", controller.GroupHandler.HandleCreateGroup()).Methods(http.MethodPost)
 	r.HandleFunc("/group/{id}", controller.GroupHandler.HandleGetGroup()).Methods(http.MethodGet)
 	r.HandleFunc("/group", controller.GroupHandler.HandleGetAllGroups()).Methods(http.MethodGet)
 	r.HandleFunc("/group/{id}", controller.GroupHandler.HandleDeleteGroup()).Methods(http.MethodDelete)
 
+	// get events for group by group id
+	r.HandleFunc("/group/{id}/event", HandlePreFlight(
+		controller.EventHandler.HandleGetGroupsEvents(
+			logRequest()))).Methods(http.MethodGet, http.MethodOptions)
+
+	// event routes
+	// create event
 	r.HandleFunc("/event", HandlePreFlight(
 		controller.EventHandler.HandleCreateEvent(
 			logRequest()))).Methods(http.MethodPost, http.MethodOptions)
-	r.HandleFunc("/event/{id}", controller.EventHandler.HandleGetEvent()).Methods(http.MethodGet)
-	r.HandleFunc("/event/{id}", controller.EventHandler.HandleDeleteEvent()).Methods(http.MethodDelete)
-	r.HandleFunc("/event/{id}/pairing", controller.EventHandler.HandleCreatingPairingRound()).Methods(http.MethodPost)
 
+	// get event by id
+	r.HandleFunc("/event/{id}", HandlePreFlight(
+		controller.EventHandler.HandleGetEvent(
+			logRequest()))).Methods(http.MethodGet, http.MethodOptions)
+
+	// delete event by id
+	r.HandleFunc("/event/{id}", controller.EventHandler.HandleDeleteEvent()).Methods(http.MethodDelete)
+
+	// create pairing round for event
+	r.HandleFunc("/event/{id}/pairing", HandlePreFlight(
+		controller.EventHandler.HandleCreatingPairingRound(
+			logRequest()))).Methods(http.MethodPost, http.MethodOptions)
+
+	// get count of pairing rounds for event
+	r.HandleFunc("/event/{id}/pairing/count", HandlePreFlight(
+		controller.EventHandler.HandleGetPairingCount(
+			logRequest()))).Methods(http.MethodGet, http.MethodOptions)
+
+	// create / add attendee for event
 	r.HandleFunc("/event/{eventId}/attendee", HandlePreFlight(
 		controller.AttendeeHandler.HandleCreateAttendee(
 			logRequest()))).Methods(http.MethodPost, http.MethodOptions)
-	r.HandleFunc("/event/{eventId}/demo", controller.AttendeeHandler.HandleInitDemo()).Methods(http.MethodPost)
+
+	// add demo attendees to an event
+	r.HandleFunc("/event/{eventId}/demo", HandlePreFlight(
+		controller.AttendeeHandler.HandleInitDemo(
+			logRequest()))).Methods(http.MethodPost, http.MethodOptions)
+
 	r.HandleFunc("/attendee/{id}", controller.AttendeeHandler.HandleGet()).Methods(http.MethodGet)
 	r.HandleFunc("/attendee/{id}", controller.AttendeeHandler.HandleDelete()).Methods(http.MethodDelete)
 

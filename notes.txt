@@ -43,7 +43,7 @@ ADD AN ENDPOINT for an existing resource
 
 
 ADD A NEW resource
-- add new folder under internal/app/domain
+- add new file under internal/app/domain
 - create a repository interface in internal/app/ports/repositories.go
 - create a service interface in internal/app/ports/services.go
 - create a new folder under internal/app/services and add a service.go file and implement service interface

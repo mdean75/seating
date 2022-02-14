@@ -19,7 +19,7 @@ func NewHTTPHandler(attendeeService ports.AttendeeService) *HTTPHandler {
 
 //var demoAttendees []domain.Attendee
 
-func (h *HTTPHandler) HandleInitDemo() http.HandlerFunc {
+func (h *HTTPHandler) HandleInitDemo(next http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id := vars["eventId"]
@@ -37,6 +37,7 @@ func (h *HTTPHandler) HandleInitDemo() http.HandlerFunc {
 
 		w.WriteHeader(http.StatusCreated)
 		w.Write([]byte("demo attendees added"))
+		next.ServeHTTP(w, r)
 	}
 }
 func (h *HTTPHandler) HandleCreateAttendee(next http.Handler) http.HandlerFunc {
