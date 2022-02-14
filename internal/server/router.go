@@ -13,7 +13,7 @@ import (
 
 func NewRouterWithCors(controller *app.Controller, conf config.Configuration) http.Handler {
 	methods := []string{http.MethodPost, http.MethodGet, http.MethodOptions}
-	origins := []string{"http://localhost:8080", "http://192.168.1.211:8080", "http://localhost:4200", "https://letters2lostlovedones.com", "http://127.0.0.1:4200"}
+	origins := []string{"http://localhost:8080", "http://192.168.1.211:8080", "http://localhost:4200", "https://seating-ui.bedaring.me", "http://127.0.0.1:4200"}
 	headers := []string{"Content-Type"}
 
 	opts := cors.Options{
