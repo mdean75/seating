@@ -1,9 +1,7 @@
 package server
 
 import (
-	"fmt"
 	"net/http"
-	"time"
 )
 
 func HandlePreFlight(next http.Handler) http.HandlerFunc {
@@ -22,9 +20,9 @@ func logRequest() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// TODO: MAKE THIS AN INITIALIZATION, MAYBE PART OF CONFIG
 		//		location, _ := time.LoadLocation("America/Chicago")
-		if r.Context().Value("log") != "" {
-			fmt.Println(r.Host, time.Now().Format(time.RFC822Z), r.Method, r.RequestURI, r.Proto, r.RemoteAddr, r.UserAgent())
-		}
+		//if r.Context().Value("log") != "" {
+		//	fmt.Println(r.Host, time.Now().Format(time.RFC822Z), r.Method, r.RequestURI, r.Proto, r.RemoteAddr, r.UserAgent())
+		//}
 		//fmt.Println(r.Host, time.Now().Format(time.RFC822Z), r.Method, r.RequestURI, r.Proto, r.RemoteAddr, r.UserAgent())
 		//next.ServeHTTP(w, r)
 
