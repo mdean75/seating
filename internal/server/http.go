@@ -2,14 +2,11 @@ package server
 
 import (
 	"context"
-	"fmt"
-	"github.com/rs/zerolog"
-
-	//"log"
 	"net/http"
 	"os"
 	"os/signal"
 
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
 	"seating/internal/app"
@@ -45,7 +42,6 @@ func NewHTTP(controller *app.Controller, conf config.Configuration) *http.Server
 }
 
 func Run() {
-	//zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	zerolog.LevelFieldName = "severity"
 	zerolog.TimestampFieldName = "timestamp"
 	zerolog.TimeFieldFormat = time.RFC3339Nano
@@ -55,10 +51,10 @@ func Run() {
 
 	conf := config.EnvVar{}.LoadConfig()
 
-	log.Debug().Msg("Connecting to database")
+	log.Info().Msg("Connecting to database")
 	mongoConn, err := db.NewMongoDatabase(conf.DBConn())
 	if err != nil {
-		fmt.Println("unable to connect to mongo: ", err)
+		log.Error().Msgf("unable to connect to mongo: %v", err)
 		return
 	}
 
@@ -86,17 +82,17 @@ func Run() {
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil {
-			fmt.Println(err)
+			log.Error().Msgf("ListenAndServer() %v", err)
 			return
 		}
 	}()
-	log.Info().Msgf("Server Started: ", srv.Addr)
+	log.Info().Msgf("Server Started: %s", srv.Addr)
 
 	select {
 	case <-stop:
-		fmt.Println("os stop signal received")
+		log.Info().Msg("os stop signal received")
 	case <-kill:
-		fmt.Println("kill signal received")
+		log.Info().Msg("kill signal received")
 	}
 
 	log.Info().Msg("Server Stopped")
