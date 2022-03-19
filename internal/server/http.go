@@ -3,10 +3,14 @@ package server
 import (
 	"context"
 	"fmt"
-	"log"
+	"github.com/rs/zerolog"
+
+	//"log"
 	"net/http"
 	"os"
 	"os/signal"
+
+	"github.com/rs/zerolog/log"
 
 	"seating/internal/app"
 	"seating/internal/app/services/attendeeservice"
@@ -41,11 +45,14 @@ func NewHTTP(controller *app.Controller, conf config.Configuration) *http.Server
 }
 
 func Run() {
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+
 	stop := make(chan os.Signal, 1)
 	kill := make(chan struct{}, 1)
 
 	conf := config.EnvVar{}.LoadConfig()
 
+	log.Debug().Msg("Connecting to database")
 	mongoConn, err := db.NewMongoDatabase(conf.DBConn())
 	if err != nil {
 		fmt.Println("unable to connect to mongo: ", err)
@@ -69,6 +76,7 @@ func Run() {
 
 	appController := app.NewController(groupHandler, eventHandler, attendeeHandler, industryHandler)
 
+	log.Info().Msg("Start HTTP server")
 	srv := NewHTTP(appController, conf)
 
 	signal.Notify(stop, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
@@ -79,7 +87,7 @@ func Run() {
 			return
 		}
 	}()
-	log.Print("Server Started: ", srv.Addr)
+	log.Info().Msgf("Server Started: ", srv.Addr)
 
 	select {
 	case <-stop:
@@ -88,7 +96,7 @@ func Run() {
 		fmt.Println("kill signal received")
 	}
 
-	log.Print("Server Stopped")
+	log.Info().Msg("Server Stopped")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer func() {
@@ -99,5 +107,5 @@ func Run() {
 	if err := srv.Shutdown(ctx); err != nil {
 		return
 	}
-	log.Print("Server Exited Properly")
+	log.Info().Msg("Server Exited Properly")
 }
