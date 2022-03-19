@@ -2,7 +2,6 @@ package eventadapter
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"seating/internal/app/domain"
 	"seating/internal/app/ports"
@@ -10,6 +9,7 @@ import (
 	"seating/internal/handlers/groupadapter"
 
 	"github.com/gorilla/mux"
+	"github.com/rs/zerolog/log"
 )
 
 type HTTPHandler struct {
@@ -28,7 +28,7 @@ func (h *HTTPHandler) HandleGetPairingCount(next http.Handler) http.HandlerFunc 
 
 		count, err := h.eventService.GetListCount(id)
 		if err != nil {
-			fmt.Println("error unable to get list count from db: ", err)
+			log.Error().Msgf("error unable to get list count from db: %v", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
 
@@ -56,7 +56,7 @@ func (h *HTTPHandler) HandleCreatingPairingRound(next http.Handler) http.Handler
 
 		err := json.NewDecoder(r.Body).Decode(&attendees)
 		if err != nil {
-			fmt.Println("error unable to decode body: ", err)
+			log.Error().Msgf("error unable to decode body: %v", err)
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
 
@@ -78,7 +78,7 @@ func (h *HTTPHandler) HandleCreatingPairingRound(next http.Handler) http.Handler
 		// get the event data which has all the attendees and their previous pairs
 		event, err := h.eventService.GetEvent(id)
 		if err != nil {
-			fmt.Println("error unable to decode body: ", err)
+			log.Error().Msgf("error unable to decode body: %v", err)
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
 
@@ -101,7 +101,7 @@ func (h *HTTPHandler) HandleCreatingPairingRound(next http.Handler) http.Handler
 		// returns a domain attendee list
 		pairing, err := domain.NewPairingRound(domAttendees)
 		if err != nil {
-			fmt.Println("error unable to decode body: ", err)
+			log.Error().Msgf("error unable to decode body: %v", err)
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
 
@@ -136,12 +136,12 @@ func (h *HTTPHandler) HandleCreatingPairingRound(next http.Handler) http.Handler
 
 		err = h.eventService.CreatePairingRound(id, domainPairs)
 		if err != nil {
-			fmt.Println(err)
+			log.Error().Msgf("CreatePairingRound() %v", err)
 		}
 
 		b, err := json.Marshal(response)
 		if err != nil {
-			fmt.Println("error unable to decode body: ", err)
+			log.Error().Msgf("error unable to decode body: %v", err)
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
 
@@ -163,7 +163,7 @@ func (h *HTTPHandler) HandleCreateEvent(next http.Handler) http.HandlerFunc {
 
 		err := json.NewDecoder(r.Body).Decode(&event)
 		if err != nil {
-			fmt.Println("error unable to decode body: ", err)
+			log.Error().Msgf("error unable to decode body: %v", err)
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
 
@@ -174,7 +174,7 @@ func (h *HTTPHandler) HandleCreateEvent(next http.Handler) http.HandlerFunc {
 
 		domainEvent, err := h.eventService.CreateEvent(event.GroupID, groupadapter.ConvertDomainGroupFromJSON(event.Group), event.Date)
 		if err != nil {
-			fmt.Println(err)
+			log.Error().Msgf("CreateEvent %v", err)
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
 
@@ -212,7 +212,7 @@ func (h *HTTPHandler) HandleGetEvent(next http.Handler) http.HandlerFunc {
 
 		event, err := h.eventService.GetEvent(id)
 		if err != nil {
-			fmt.Println(err)
+			log.Error().Msgf("%v", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
 			return
@@ -246,7 +246,7 @@ func (h *HTTPHandler) HandleDeleteEvent() http.HandlerFunc {
 
 		err := h.eventService.DeleteEvent(id)
 		if err != nil {
-			fmt.Println(err)
+			log.Error().Msgf("%v", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
 			return
