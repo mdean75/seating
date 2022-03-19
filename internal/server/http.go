@@ -45,7 +45,10 @@ func NewHTTP(controller *app.Controller, conf config.Configuration) *http.Server
 }
 
 func Run() {
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	//zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	zerolog.LevelFieldName = "severity"
+	zerolog.TimestampFieldName = "timestamp"
+	zerolog.TimeFieldFormat = time.RFC3339Nano
 
 	stop := make(chan os.Signal, 1)
 	kill := make(chan struct{}, 1)
