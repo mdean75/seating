@@ -26,6 +26,8 @@ func (h *HTTPHandler) HandleGetPairingCount(next http.Handler) http.HandlerFunc 
 		vars := mux.Vars(r)
 		id := vars["id"]
 
+		// TODO: use env var to set log level
+		log.Debug().Msgf("GetListCount for id %s", id)
 		count, err := h.eventService.GetListCount(id)
 		if err != nil {
 			log.Error().Msgf("error unable to get list count from db: %v", err)
@@ -56,7 +58,7 @@ func (h *HTTPHandler) HandleCreatingPairingRound(next http.Handler) http.Handler
 
 		err := json.NewDecoder(r.Body).Decode(&attendees)
 		if err != nil {
-			log.Error().Msgf("error unable to decode body: %v", err)
+			log.Error().Msgf("HandleCreatingPairingRound error unable to decode body: %v", err)
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
 
@@ -64,18 +66,19 @@ func (h *HTTPHandler) HandleCreatingPairingRound(next http.Handler) http.Handler
 		}
 
 		// convert the json attendee list to a domain array
-		var domainAttendees []domain.Attendee
-		for _, a := range attendees {
-			domainAttendees = append(domainAttendees, domain.NewAttendee(a.ID, a.Name, a.CompanyName, a.Industry))
-		}
+		//var domainAttendees []domain.Attendee
+		//for _, a := range attendees {
+		//	domainAttendees = append(domainAttendees, domain.NewAttendee(a.ID, a.Name, a.CompanyName, a.Industry))
+		//}
 
-		// convert the json attendde list to a domain attendee map
+		// convert the json attendee list to a domain attendee map
 		domAttendees := make(map[string]domain.Attendee)
 		for _, a := range attendees {
 			domAttendees[a.ID] = domain.NewAttendee(a.ID, a.Name, a.CompanyName, a.Industry)
 		}
 
 		// get the event data which has all the attendees and their previous pairs
+		log.Debug().Msgf("fetching event details for %s", id)
 		event, err := h.eventService.GetEvent(id)
 		if err != nil {
 			log.Error().Msgf("error unable to decode body: %v", err)
@@ -101,7 +104,7 @@ func (h *HTTPHandler) HandleCreatingPairingRound(next http.Handler) http.Handler
 		// returns a domain attendee list
 		pairing, err := domain.NewPairingRound(domAttendees)
 		if err != nil {
-			log.Error().Msgf("error unable to decode body: %v", err)
+			log.Error().Msgf("HandleCreatingPairingRound error unable to create domain pairing round: %v", err)
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
 
@@ -134,11 +137,13 @@ func (h *HTTPHandler) HandleCreatingPairingRound(next http.Handler) http.Handler
 				domain.NewAttendee(p.Seat2.ID, p.Seat2.Name, p.Seat2.CompanyName, p.Seat2.Industry)))
 		}
 
+		log.Debug().Msgf("HandleCreatingPairingRound saving round %s, %+v", id, domainPairs)
 		err = h.eventService.CreatePairingRound(id, domainPairs)
 		if err != nil {
 			log.Error().Msgf("CreatePairingRound() %v", err)
 		}
 
+		log.Debug().Msgf("HandleCreatingPairingRound successfully created pairing for %s %+v", id, response)
 		b, err := json.Marshal(response)
 		if err != nil {
 			log.Error().Msgf("error unable to decode body: %v", err)

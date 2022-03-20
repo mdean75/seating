@@ -82,7 +82,7 @@ func Run() {
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil {
-			log.Error().Msgf("ListenAndServer() %v", err)
+			log.Printf("ListenAndServe() %v", err)
 			return
 		}
 	}()
