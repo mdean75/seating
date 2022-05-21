@@ -76,10 +76,25 @@ func NewPairingRound(attendees map[string]Attendee) (PairingRound, error) {
 	}
 
 	//lastPair1, a.Attendees := arrayShift(a.Attendees)
-	a.Pairs = append(a.Pairs, Pair{
+	pp := Pair{
 		Seat1: a.Attendees[keys[0]],
 		Seat2: a.Attendees[keys[1]],
-	})
+	}
+
+	pp.Seat1.PairedWith = append(pp.Seat1.PairedWith, pp.Seat2)
+	pp.Seat2.PairedWith = append(pp.Seat2.PairedWith, pp.Seat1)
+
+	pp.Seat1.PairedWithName = append(pp.Seat1.PairedWithName, pp.Seat2.Name)
+	pp.Seat2.PairedWithName = append(pp.Seat2.PairedWithName, pp.Seat1.Name)
+
+	pp.Seat1.PairedWithID = append(pp.Seat1.PairedWithID, pp.Seat2.ID)
+	pp.Seat2.PairedWithID = append(pp.Seat2.PairedWithID, pp.Seat1.ID)
+
+	//a.Pairs = append(a.Pairs, Pair{
+	//	Seat1: a.Attendees[keys[0]],
+	//	Seat2: a.Attendees[keys[1]],
+	//})
+	a.Pairs = append(a.Pairs, pp)
 
 	//addAttendeePairing(a.Attendees[0], a.Attendees[1], a.Attendees)
 	return a, nil
